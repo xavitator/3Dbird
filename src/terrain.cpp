@@ -102,13 +102,13 @@ vector<vec3> generate_positions_on_terrain(int N, perlin_noise_parameters const&
     
     for (int i = 0; i < N; i++) {
         vec3 b;
-        BOOLEAN c = false;
+        int c = 0;
         while (!c) {
             b = evaluate_terrain(rand_interval(), rand_interval(), parameters);
-            c = true;
+            c = 1;
             for (size_t k = 0; k < a.size(); k++) {
                 if (a[k][0] - b[0] < 0.8&& a[k][0] - b[0]>-0.8 && a[k][1] - b[1] <0.8 && a[k][1] - b[1]>-0.8) {
-                    c = false;
+                    c = 0;
                 }
             }
         }

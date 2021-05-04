@@ -31,5 +31,12 @@
 *.out
 *.app
 
-# Fichiers
+# Fichiers windows
 build/
+
+# fichiers ubuntu
+CMakeFiles/
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+3Dbird
