@@ -1,49 +1,21 @@
 #include "vcl/vcl.hpp"
 #include <iostream>
 
+#include "view.hpp"
 #include "terrain.hpp"
 #include "tree.hpp"
+#include "bird.hpp"
+#include "variable.hpp"
 
 using namespace vcl;
 
-struct gui_parameters {
-	bool display_frame = true;
-	bool add_sphere = true;
-};
-
-struct user_interaction_parameters {
-	vec2 mouse_prev;
-	timer_fps fps_record;
-	mesh_drawable global_frame;
-	gui_parameters gui;
-	bool cursor_on_gui;
-};
-user_interaction_parameters user;
-
-struct scene_environment
-{
-	camera_around_center camera;
-	mat4 projection;
-	vec3 light;
-};
-scene_environment scene;
-
-
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos);
 void window_size_callback(GLFWwindow* window, int width, int height);
+void opengl_uniform(GLuint shader, scene_environment const& current_scene);
 
 void initialize_data();
 void display_scene();
 void display_interface();
-
-mesh terrain;
-mesh_drawable terrain_visual;
-mesh_drawable tree;
-mesh_drawable feuille;
-std::vector<vcl::vec3> tree_position;
-perlin_noise_parameters parameters;
-mesh_drawable billboard_grass;
-mesh_drawable billboard_bird;
 
 int main(int, char* argv[])
 {
@@ -56,6 +28,7 @@ int main(int, char* argv[])
 
 	imgui_init(window);
 	glfwSetCursorPosCallback(window, mouse_move_callback);
+	glfwSetKeyCallback(window, keyboard_callback);
 	glfwSetWindowSizeCallback(window, window_size_callback);
 	
 	std::cout<<"Initialize data ..."<<std::endl;
@@ -81,6 +54,7 @@ int main(int, char* argv[])
 
 		ImGui::Begin("GUI",NULL,ImGuiWindowFlags_AlwaysAutoResize);
 		user.cursor_on_gui = ImGui::IsAnyWindowFocused();
+		//user.cursor_on_gui = ImGui::GetIO().WantCaptureMouse;
 
 		if(user.gui.display_frame) draw(user.global_frame, scene);
 
@@ -141,6 +115,8 @@ void initialize_data()
 	
 
 	tree_position = generate_positions_on_terrain(100, parameters);
+
+	create_bird();
 }
 
 
@@ -151,7 +127,7 @@ void display_scene()
 		tree.transform.translate = tree_position[i];
 		draw(tree, scene);
 	}
-	
+	move_bird();
 }
 
 

@@ -1,14 +1,7 @@
 #pragma once
 
 #include "vcl/vcl.hpp"
-
-struct perlin_noise_parameters
-{
-	float persistency = 0.35f;
-	float frequency_gain = 200.00f;
-	int octave = 6;
-	float terrain_height = 0.4f;
-};
+#include "variable.hpp"
 
 
 vcl::vec3 evaluate_terrain(float u, float v, perlin_noise_parameters const& parameters);
