@@ -17,6 +17,7 @@ struct keyboard_state_parameters{
 	bool left  = false; 
 	bool right = false; 
 	bool up    = false;
+	bool down  = false;
 };
 
 

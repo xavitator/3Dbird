@@ -3,35 +3,36 @@
 #include "variable.hpp"
 
 
+void init_camera(){
+	scene.camera.distance_to_center = 2.5f;
+	scene.camera.look_at({4,3,2}, {0,0,0}, {0,0,1});
+}
 
 void move_camera()
 {
-	// Handle camera fly-through
-	float dt = timer.update();
-	// scene.camera.position_camera += user.speed*0.1f*dt*scene.camera.front();
-	// if(user.keyboard_state.up)
-	// 	scene.camera.manipulator_rotate_roll_pitch_yaw(0,-0.5f*dt,0);
-	// if(user.keyboard_state.right)
-	// 	scene.camera.manipulator_rotate_roll_pitch_yaw(0.7f*dt,0,0);
-	// if(user.keyboard_state.left)
-	// 	scene.camera.manipulator_rotate_roll_pitch_yaw(-0.7f*dt,0,0);
+	scene.camera.center_of_rotation = get_pos_bird();
 }
 
 // Store keyboard state
 // left-right / up-down key
 void keyboard_callback(GLFWwindow* , int key, int , int action, int )
 {
-	if(key == GLFW_KEY_UP){
+	if(key == GLFW_KEY_UP || key == GLFW_KEY_Z || key == GLFW_KEY_W){
 		if(action == GLFW_PRESS) user.keyboard_state.up = true;
 		if(action == GLFW_RELEASE) user.keyboard_state.up = false;
 	}
 
-	if(key == GLFW_KEY_LEFT){
+	if(key == GLFW_KEY_DOWN || key == GLFW_KEY_S){
+		if(action == GLFW_PRESS) user.keyboard_state.down = true;
+		if(action == GLFW_RELEASE) user.keyboard_state.down = false;
+	}
+
+	if(key == GLFW_KEY_LEFT || key == GLFW_KEY_A || key == GLFW_KEY_Q){
 		if(action == GLFW_PRESS) user.keyboard_state.left = true;
 		if(action == GLFW_RELEASE) user.keyboard_state.left = false;
 	}
 
-	if(key == GLFW_KEY_RIGHT){
+	if(key == GLFW_KEY_RIGHT || key == GLFW_KEY_D){
 		if(action == GLFW_PRESS) user.keyboard_state.right = true;
 		if(action == GLFW_RELEASE) user.keyboard_state.right = false;
 	}

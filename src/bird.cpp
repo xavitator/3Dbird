@@ -1,11 +1,15 @@
 #include "vcl/vcl.hpp"
 #include "variable.hpp"
 #include <iostream>
+#include <typeinfo>  //for 'typeid' to work  
+
 
 
 using namespace vcl;
 
 hierarchy_mesh_drawable hierarchy_bird;
+vec3 orientation_bird = {0,1,0};
+vec3 pos_without_oscill;
 
 void opengl_uniform(GLuint shader, scene_environment const& current_scene);
 
@@ -108,6 +112,8 @@ void create_bird(){
     hierarchy_bird.add(shoulder_right, "shoulder_right", "body", {radius_body-0.05f,0,0});
     hierarchy_bird.add(elbow, "elbow_right", "shoulder_right", {length_arm,0,0});
     hierarchy_bird.add(arm_right, "arm_bottom_right", "elbow_right");
+
+    pos_without_oscill = hierarchy_bird["body"].transform.translate;
 }
 
 void move_bird(){
@@ -117,19 +123,48 @@ void move_bird(){
 
     timer.update();
     float t = timer.t;
-    float coef_rot = 0.1;
+    float coef_rot = 0.1f;
     // The body oscillate along the z direction
     hierarchy_mesh_drawable_node bird = hierarchy_bird["body"];
-    std::cout << bird.transform.translate << std::endl;
-    hierarchy_bird["body"].transform.translate += {0,0,0.02f*(std::sin(2*3.14f*t))};
-    hierarchy_bird["body"].transform.translate += user.speed*0.001f*t;
-    if(user.keyboard_state.up)
-    	hierarchy_bird["body"].transform.rotate = rotation({0,1,0}, -0.5f*t*coef_rot);
-    if(user.keyboard_state.right)
-    	hierarchy_bird["body"].transform.rotate = rotation({1,0,0}, 0.7f*t*coef_rot);
-    if(user.keyboard_state.left)
-    	hierarchy_bird["body"].transform.rotate = rotation({1,0,0}, -0.7f*t*coef_rot);
-
+    //hierarchy_bird["body"].transform.translate += {0,0,0.02f*(std::sin(2*3.14f*t))};
+    mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
+    hierarchy_bird["body"].transform.translate += user.speed*0.001f*t*tmp*orientation_bird;
+    pos_without_oscill += user.speed*0.001f*t*tmp*orientation_bird;
+    vec3 rot_vec;
+    float rot_facteur = 0.5f*coef_rot;
+    rotation tmpp;
+    int b = 0;
+    if(user.keyboard_state.up){
+        rot_vec = {1,0,0};
+        b = 1;
+        tmpp = hierarchy_bird["body"].transform.rotate;
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+        hierarchy_bird["body"].transform.rotate = tmpp;
+    }
+    if(user.keyboard_state.down){
+        b = 1;
+        rot_vec = {-1,0,0};
+        tmpp = hierarchy_bird["body"].transform.rotate;
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+        hierarchy_bird["body"].transform.rotate = tmpp;
+    }
+    if(user.keyboard_state.right){
+        b = 1;
+        rot_vec = {0,0,-1};
+    	tmpp = hierarchy_bird["body"].transform.rotate;
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+        hierarchy_bird["body"].transform.rotate = tmpp;
+    }
+    if(user.keyboard_state.left){
+        b = 1;
+        rot_vec = {0,0,1};
+    	tmpp = hierarchy_bird["body"].transform.rotate;
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+        hierarchy_bird["body"].transform.rotate = tmpp;
+    }
+    if(! b) {
+        hierarchy_bird["body"].transform.translate += tmp * vec3(0,0,0.02f*(std::sin(2*3.14f*t)));
+    }
 	// Rotation of the shoulder-left around the y axis
     hierarchy_bird["shoulder_left"].transform.rotate   = rotation({0,0,1}, std::sin(2*3.14f*(t-0.4f)) );
 	// Rotation of the arm-left around the y axis (delayed with respect to the shoulder)
@@ -142,10 +177,14 @@ void move_bird(){
 	
 	// update the global coordinates
 	hierarchy_bird.update_local_to_global_coordinates();
-
 	// display the hierarchy_bird
 	if(user.gui.display_surface)
 		draw(hierarchy_bird, scene);
 	if(user.gui.display_wireframe)
 		draw_wireframe(hierarchy_bird, scene);
+}
+
+vec3 get_pos_bird(){
+    vec3 pos = pos_without_oscill;
+    return pos;
 }
