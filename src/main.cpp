@@ -42,6 +42,7 @@ void display_interface();
 
 mesh terrain;
 mesh ocean_m;
+
 mesh_drawable terrain_visual;
 mesh_drawable ocean;
 mesh_drawable tree;
@@ -69,11 +70,17 @@ std::vector<float> cloud_orientation;
 std::vector<vcl::vec3> ship_position;
 std::vector<float> ship_orientation;
 
+std::vector<vcl::vec3> ring_position;
+std::vector<float> ring_orientation;
+
+std::vector<perlin_noise_parameters> liste_noise_ile;
+
 int taille_terrain = 100;
-int nb_iles = 5;
+int nb_iles = 6;
 int nb_arbres = 20;
 int nb_cloud = 40;
 int nb_ship = 20;
+int nb_ring = 20; 
 
 
 int main(int, char* argv[])
@@ -169,11 +176,12 @@ void initialize_data()
 	
 	
 	ile_position = generate_positions_ile(nb_iles,taille_terrain);
-	ile_orientation = generate_rotation(5);
-	for (int k = 0; k < 5; k++) {
+	ile_orientation = generate_rotation(nb_iles);
+	for (int k = 0; k < nb_iles; k++) {
 		perlin_noise_parameters par2= generate_alea_ile();
 		liste_iles.push_back(ile(par2));
 		liste_tree_position.push_back(generate_positions_on_terrain(nb_arbres, par2));
+		liste_noise_ile.push_back(par2);
 	}
 	wall = mesh_drawable(create_wall(taille_terrain));
 	image_raw const im3 = image_load_png("assets/rayure1.png");
@@ -197,16 +205,21 @@ void initialize_data()
 	cloud4 = mesh_drawable(mesh_load_file_obj("assets/Cloud_4.obj"));
 
 	cloud_position = generate_positions_clouds(nb_cloud, taille_terrain);
-	cloud_orientation = generate_rotation_cloud(20);
+	cloud_orientation = generate_rotation(nb_cloud);
 	
 	ship = mesh_drawable(mesh_load_file_obj("assets/ship.obj"));
-	ship.transform.scale = 0.01f;
+	ship.transform.scale = 0.023f;
 	ship.shading.color = { 0.24f,0.20f,0.2f };
 	
 	ring = mesh_drawable(mesh_load_file_obj("assets/cercle.obj"));
+	ring.shading.color = { 1.0f,0,0 };
+	ring.transform.scale = 0.5f;
+
+	ring_orientation = generate_rotation(nb_ring);
+	ring_position = generate_positions_ring(nb_ring, taille_terrain);
 
 	ship_position = generate_positions_ships(nb_ship, taille_terrain, ile_position);
-	ship_orientation = generate_rotation_ship(nb_ship);
+	ship_orientation = generate_rotation(nb_ship);
 
 	ocean_m = create_ocean(parameters, taille_terrain);
 	ocean = mesh_drawable(ocean_m);
@@ -254,32 +267,37 @@ void display_scene()
 		//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
 		draw(ship, scene);
 	}
+	int j = 0;
 	for (int i = 0; i < cloud_position.size(); i++) {
-		int j = 0;
 		if (j == 0) {
-			cloud1.transform.translate = cloud_position[i];
+			cloud1.transform.translate = cloud_deplacement(cloud_position[i],taille_terrain);
 			cloud1.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud1, scene);
 			j++;
 		}
-		if (j == 1) {
-			cloud2.transform.translate = cloud_position[i];
+		else if (j == 1) {
+			cloud2.transform.translate = cloud_deplacement(cloud_position[i], taille_terrain);
 			cloud2.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud2, scene);
 			j++;
 		}
-		if (j == 2) {
-			cloud3.transform.translate = cloud_position[i];
+		else if (j == 2) {
+			cloud3.transform.translate = cloud_deplacement(cloud_position[i], taille_terrain);
 			cloud3.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud3, scene);
 			j++;
 		}
-		if (j == 3) {
-			cloud4.transform.translate = cloud_position[i];
+		else if (j == 3) {
+			cloud4.transform.translate = cloud_deplacement(cloud_position[i], taille_terrain);
 			cloud4.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud4, scene);
 			j=0;
 		}
+	}
+	for (int i = 0; i < ring_position.size(); i++) {
+		ring.transform.translate = ring_position[i];
+		ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
+		draw(ring, scene);
 	}
 	ocean.transform.translate = { 0,0,0 };
 	draw(ocean, scene);	

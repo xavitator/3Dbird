@@ -92,7 +92,7 @@ mesh create_cone(float radius, float height, float z_offset)
 
 mesh create_tree()
 {
-    float const h = 0.7f; // trunk height
+    float const h = 1.0f; // trunk height
     float const r = 0.1f; // trunk radius
 
     // Create a brown trunk
@@ -104,7 +104,6 @@ mesh create_tree()
     GLuint const texture_image_id2 = opengl_texture_to_gpu(im2,
         GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
         GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
-
 
 
 

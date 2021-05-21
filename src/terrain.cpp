@@ -285,6 +285,32 @@ vector<vec3> generate_positions_clouds(int N, int taille) {
     return a;
 }
 
+std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
+{
+    std::vector<vec3> a;
+
+    for (int i = 0; i < N; i++) {
+        vec3 b;
+        BOOLEAN c = false;
+        float FLOAT_MIN = -(float)taille / 2;
+        float FLOAT_MAX = (float)taille / 2;
+        float HEIGHT_MAX = 10.0f;
+        float HEIGHT_MIN = 0.2f;
+        while (!c) {
+            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) ,  HEIGHT_MIN + (float)(rand()) / ((float)(32767.0f / (HEIGHT_MAX - HEIGHT_MIN))) };
+            c = true;
+            for (size_t k = 0; k < a.size(); k++) {
+                if (a[k][0] - b[0] <5 && a[k][0] - b[0]>-5 && a[k][1] - b[1] <5 && a[k][1] - b[1]>-5) {
+                    c = false;
+                }
+            }
+        }
+        a.push_back(b);
+    }
+    return a;
+    return std::vector<vcl::vec3>();
+}
+
 vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_ile) {
     std::vector<vec3> a;
 
@@ -295,11 +321,12 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
         float FLOAT_MAX = (float)taille / 2;
         float HEIGHT_MAX = 10.0f;
         float HEIGHT_MIN = 5.0f;
+        float taille_ship = 8.0f;
         while (!c) {
-            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) , 0.3f };
+            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) , 0.35f };
             c = true;
             for (size_t k = 0; k < a.size(); k++) {
-                if (a[k][0] - b[0] < 2.5 && a[k][0] - b[0]>-2.5 && a[k][1] - b[1] <2.5 && a[k][1] - b[1]>-2.5) {
+                if (a[k][0] - b[0] <taille_ship && a[k][0] - b[0]>-taille_ship && a[k][1] - b[1] <taille_ship && a[k][1] - b[1]>-taille_ship) {
                     c = false;
                 }
             }
@@ -314,27 +341,6 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
     return a;
 }
 
-vector<float> generate_rotation_cloud(int N)
-{
-    vector<float> b;
-    for (int k = 0; k < N; k++) {
-        float FLOAT_MIN = 0.0f;
-        float FLOAT_MAX = 3.14f;
-        b.push_back(FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))));
-    }
-    return b;
-}
-
-vector<float> generate_rotation_ship(int N)
-{
-    vector<float> b;
-    for (int k = 0; k < N; k++) {
-        float FLOAT_MIN = 0.0f;
-        float FLOAT_MAX = 3.14f;
-        b.push_back(FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))));
-    }
-    return b;
-}
 
 void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters)
 {
@@ -387,4 +393,16 @@ float ocean_height(float a, float b, int N, perlin_noise_parameters const& param
     // Compute the Perlin noise
     float const noise = noise_perlin({ std::sin(timer.t * v_maree + v), std::cos(timer.t * v_maree + u) }, parameters.octave, parameters.persistency, parameters.frequency_gain);
     return std::max(0.01f, parameters.terrain_height * noise *5);
+}
+
+vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
+{
+    float v =1.0f;
+    float a = ((float) v *(float) timer.t + (float) position_initiale[0]) ;
+    while (a>taille/2)
+    {
+        a = a - taille;
+    }
+    position_initiale[0] = a;
+    return position_initiale;
 }
