@@ -1,5 +1,6 @@
 
 #include "terrain.hpp"
+#include "variable.hpp"
 
 using namespace vcl;
 using std::vector;

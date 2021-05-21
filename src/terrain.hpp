@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vcl/vcl.hpp"
+#include "variable.hpp"
 #include <random>
 #include <iostream>
 #include <iomanip>
