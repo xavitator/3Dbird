@@ -5,36 +5,55 @@ using namespace vcl;
 
 mesh create_tree_trunk_cylinder(float radius, float height)
 {
-    mesh m;
+ 
 
-    // Number of samples
-    const size_t N = 20;
+    float const r = radius;
+    float const h = height;
 
-    // Geometry
-    for (size_t k = 0; k < N; ++k)
+    // Number of samples of the terrain is N x N
+    const unsigned int N = 20;
+
+    mesh cylinder; // temporary terrain storage (CPU only)
+    cylinder.position.resize(N * N);
+    cylinder.uv.resize(N * N);
+
+    // Fill terrain geometry
+    for (unsigned int ku = 0; ku < N; ++ku)
     {
-        const float u = k / float(N);
-        const vec3 p = { radius * std::cos(2 * 3.14f * u), radius * std::sin(2 * 3.14f * u), 0.0f };
-        m.position.push_back(p);
-        m.position.push_back(p + vec3(0, 0, height));
+        for (unsigned int kv = 0; kv < N; ++kv)
+        {
+            // Compute local parametric coordinates (u,v) \in [0,1]
+            const float u = ku / (N - 1.0f);
+            const float v = kv / (N - 1.0f);
+
+            // Compute the local surface function
+            vec3 const p = { r * std::cos(2 * pi * u), r * std::sin(2 * pi * u), h * (v) };
+            vec2 const uv = { u,v };
+
+            // Store vertex coordinates
+            cylinder.position[kv + N * ku] = p;
+            cylinder.uv[kv + N * ku] = { u * N / 10,v * N / 10 };
+        }
     }
 
-    // Connectivity
-    for (size_t k = 0; k < N; ++k)
+    // Generate triangle organization
+    for (size_t ku = 0; ku < N - 1; ++ku)
     {
-        const unsigned int u00 = 2 * k;
-        const unsigned int u01 = (2 * k + 1) % (2 * N);
-        const unsigned int u10 = (2 * (k + 1)) % (2 * N);
-        const unsigned int u11 = (2 * (k + 1) + 1) % (2 * N);
+        for (size_t kv = 0; kv < N - 1; ++kv)
+        {
+            const unsigned int idx = kv + N * ku;
 
-        const uint3 t1 = { u00, u10, u11 };
-        const uint3 t2 = { u00, u11, u01 };
-        m.connectivity.push_back(t1);
-        m.connectivity.push_back(t2);
+            const uint3 triangle_1 = { idx, idx + 1 + N, idx + 1 };
+            const uint3 triangle_2 = { idx, idx + N, idx + 1 + N };
+
+            cylinder.connectivity.push_back(triangle_1);
+            cylinder.connectivity.push_back(triangle_2);
+        }
     }
 
-    m.fill_empty_field();
-    return m;
+    cylinder.fill_empty_field();
+    
+    return cylinder;
 }
 
 
@@ -73,12 +92,19 @@ mesh create_cone(float radius, float height, float z_offset)
 
 mesh create_tree()
 {
-    float const h = 0.7f; // trunk height
+    float const h = 1.0f; // trunk height
     float const r = 0.1f; // trunk radius
 
     // Create a brown trunk
     mesh trunk = create_tree_trunk_cylinder(r, h);
     trunk.color.fill({ 0.4f, 0.3f, 0.3f });
+    image_raw const im2 = image_load_png("assets/trunk.png");
+
+    // Send this image to the GPU, and get its identifier texture_image_id
+    GLuint const texture_image_id2 = opengl_texture_to_gpu(im2,
+        GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
+        GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
+
 
 
     // Create a green foliage from 3 cones
