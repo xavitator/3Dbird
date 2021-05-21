@@ -23,10 +23,10 @@ struct keyboard_state_parameters{
 
 struct perlin_noise_parameters
 {
-	float persistency = 0.35f;
-	float frequency_gain = 200.00f;
-	int octave = 6;
-	float terrain_height = 0.4f;
+	float persistency = 0.368f;
+	float frequency_gain = 2.9f;
+	int octave = 8;
+	float terrain_height = 0.114f;
 };
 
 struct user_interaction_parameters {

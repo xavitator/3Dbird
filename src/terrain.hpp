@@ -11,14 +11,6 @@ using std::cout;
 using std::endl;
 using std::setprecision;
 
-struct perlin_noise_parameters
-{
-	float persistency = 0.368f;
-	float frequency_gain = 2.9f;
-	int octave = 8;
-	float terrain_height = 0.114f;
-};
-
 
 vcl::vec3 evaluate_terrain(float u, float v, perlin_noise_parameters const& parameters);
 vcl::mesh create_terrain(perlin_noise_parameters const& parameters);

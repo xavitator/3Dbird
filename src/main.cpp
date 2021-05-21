@@ -9,34 +9,12 @@
 #include "bird.hpp"
 #include "variable.hpp"
 
-using namespace vcl;
 
 #include <random>
 #include <math.h>
 
+using namespace vcl;
 
-
-struct gui_parameters {
-	bool display_frame = true;
-	bool add_sphere = true;
-};
-
-struct user_interaction_parameters {
-	vec2 mouse_prev;
-	timer_fps fps_record;
-	mesh_drawable global_frame;
-	gui_parameters gui;
-	bool cursor_on_gui;
-};
-user_interaction_parameters user;
-
-struct scene_environment
-{
-	camera_around_center camera;
-	mat4 projection;
-	vec3 light;
-};
-scene_environment scene;
 
 
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos);
@@ -105,8 +83,6 @@ int main(int, char* argv[])
 	glfwSetKeyCallback(window, keyboard_callback);
 	glfwSetWindowSizeCallback(window, window_size_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	if (glfwRawMouseMotionSupported())
-    	glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 	
 	std::cout<<"Initialize data ..."<<std::endl;
 	initialize_data();
