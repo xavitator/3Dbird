@@ -4,7 +4,6 @@
 
 using namespace vcl;
 using std::vector;
-timer_basic timer;
 
 
 // Evaluate 3D position of the terrain for any (u,v) \in [0,1]
@@ -217,7 +216,7 @@ vector<vec3> generate_positions_ile(int N, int taille) {
 
     for (int i = 0; i < N; i++) {
         vec3 b;
-        BOOLEAN c = false;
+        int c = false;
         float FLOAT_MIN =-(float) taille/2+10.0f;
         float FLOAT_MAX = (float)taille / 2 - 10.0f;
         while (!c) {
@@ -267,7 +266,7 @@ vector<vec3> generate_positions_clouds(int N, int taille) {
 
     for (int i = 0; i < N; i++) {
         vec3 b;
-        BOOLEAN c = false;
+        int c = false;
         float FLOAT_MIN = -(float) taille/2;
         float FLOAT_MAX = (float) taille / 2;
         float HEIGHT_MAX = 10.0f;
@@ -292,7 +291,7 @@ std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
 
     for (int i = 0; i < N; i++) {
         vec3 b;
-        BOOLEAN c = false;
+        int c = false;
         float FLOAT_MIN = -(float)taille / 2;
         float FLOAT_MAX = (float)taille / 2;
         float HEIGHT_MAX = 10.0f;
@@ -317,7 +316,7 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
 
     for (int i = 0; i < N; i++) {
         vec3 b;
-        BOOLEAN c = false;
+        int c = false;
         float FLOAT_MIN = -(float)taille / 2;
         float FLOAT_MAX = (float)taille / 2;
         float HEIGHT_MAX = 10.0f;
