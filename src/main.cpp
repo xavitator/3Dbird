@@ -265,7 +265,7 @@ void display_scene()
 	draw(ring, scene);
 
 	move_bird();
-	move_camera();
+	move_camera_center();
 }
 
 
@@ -286,7 +286,7 @@ void window_size_callback(GLFWwindow* , int width, int height)
 
 void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	vec2 const  p1 = glfw_get_mouse_cursor(window);
+	vec2 const  p1 = vec2(xpos, ypos);
 	vec2 const& p0 = user.mouse_prev;
 	glfw_state state = glfw_current_state(window);
 
@@ -296,9 +296,9 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if(! state.key_ctrl){
-		scene.camera.manipulator_rotate_trackball(p0, p1);
+		move_camera_rotation(p0, p1);
 	}
-	user.mouse_prev = p1;
+	//user.mouse_prev = p1;
 	//glfwSetCursorPos(window, 0, 0);
 }
 

@@ -2,15 +2,32 @@
 #include "view.hpp"
 #include "variable.hpp"
 
+vec3 pos_cam = {4,3,2};
 
 void init_camera(){
 	scene.camera.distance_to_center = 2.5f;
-	scene.camera.look_at({4,3,2}, {0,0,0}, {0,0,1});
+	scene.camera.look_at(pos_cam, {0,0,0}, {0,0,1});
 }
 
-void move_camera()
+void move_camera_center()
 {
 	scene.camera.center_of_rotation = get_pos_bird();
+}
+
+void move_camera_rotation(vec2 p0, vec2 p1){
+	float fact_rot = 0.005f;
+
+	vec3 pos_bird = get_pos_bird();
+	vec3 pos_cam_relat = pos_cam - pos_bird;
+
+	double rho = scene.camera.distance_to_center;
+	vec2 diff_pos = fact_rot * (p1 - p0);
+	double theta = std::acos(pos_cam_relat[2] / rho) + diff_pos[1];
+	double phi = std::atan(pos_cam_relat[1] / pos_cam_relat[0]) + diff_pos[0];
+
+	vec3 pos_centered = {rho * std::sin(theta) * std::cos(phi), rho * std::sin(theta) * std::sin(phi), rho * std::cos(theta)};
+
+	scene.camera.look_at(pos_centered + get_pos_bird(), get_pos_bird(), {0,0,1});
 }
 
 // Store keyboard state
