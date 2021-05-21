@@ -195,7 +195,7 @@ vector<vec3> generate_positions_on_terrain(int N, perlin_noise_parameters const&
     
     for (int i = 0; i < N; i++) {
         vec3 b;
-        BOOLEAN c = false;
+        int c = 0;
         while (!c) {
             b = evaluate_terrain(rand_interval()*0.7f+0.15f, rand_interval()*0.7f+0.15f, parameters);
             c = true;
