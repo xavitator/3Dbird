@@ -123,15 +123,17 @@ void move_bird(){
 
     timer.update();
     float t = timer.t;
-    float coef_rot = 0.1f;
+    float coef_rot = 0.01f;
     // The body oscillate along the z direction
     hierarchy_mesh_drawable_node bird = hierarchy_bird["body"];
     //hierarchy_bird["body"].transform.translate += {0,0,0.02f*(std::sin(2*3.14f*t))};
     mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
-    hierarchy_bird["body"].transform.translate += user.speed*0.001f*t*tmp*orientation_bird;
-    pos_without_oscill += user.speed*0.001f*t*tmp*orientation_bird;
+    hierarchy_bird["body"].transform.translate += user.speed*coef_rot*t*tmp*orientation_bird;
+    pos_without_oscill += user.speed*coef_rot*t*tmp*orientation_bird;
+
+    std::cout << t << std::endl;
     vec3 rot_vec;
-    float rot_facteur = 0.5f*coef_rot;
+    float rot_facteur = 0.05f;
     rotation tmpp;
     int b = 0;
     if(user.keyboard_state.up){

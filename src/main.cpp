@@ -288,17 +288,25 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	vec2 const  p1 = vec2(xpos, ypos);
 	vec2 const& p0 = user.mouse_prev;
-	glfw_state state = glfw_current_state(window);
+	// glfw_state state = glfw_current_state(window);
 
-	if(state.key_ctrl)
+	if(state.key_ctrl){
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		// auto& camera = scene.camera;
+		// vec2 const  p2 = glfw_get_mouse_cursor(window, xpos, ypos);
+		// if(state.mouse_click_left && !state.key_shift)
+		// 	scene.camera.manipulator_rotate_trackball(p0, p2);
+		// if(state.mouse_click_left && state.key_shift)
+		// 	camera.manipulator_translate_in_plane(p2-p0);
+		// if(state.mouse_click_right)
+		// 	camera.manipulator_scale_distance_to_center( (p2-p0).y );
+	}
 	else
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 	if(! state.key_ctrl){
 		move_camera_rotation(p0, p1);
 	}
-	//user.mouse_prev = p1;
+	user.mouse_prev = p1;
 	//glfwSetCursorPos(window, 0, 0);
 }
 
