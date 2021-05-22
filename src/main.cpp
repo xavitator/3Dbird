@@ -288,7 +288,7 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	vec2 const  p1 = vec2(xpos, ypos);
 	vec2 const& p0 = user.mouse_prev;
-	// glfw_state state = glfw_current_state(window);
+	glfw_state state = glfw_current_state(window);
 
 	if(state.key_ctrl){
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
