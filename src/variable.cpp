@@ -41,8 +41,17 @@ std::vector<float> ring_orientation;
 std::vector<perlin_noise_parameters> liste_noise_ile;
 
 int taille_terrain = 100;
-int nb_iles = 6;
+int nb_iles = 5;
 int nb_arbres = 20;
 int nb_cloud = 40;
 int nb_ship = 20;
 int nb_ring = 20; 
+
+int compare_vec(vec3 vec_1, vec3 vec_2) {
+	if (vec_1[0] < vec_2[0]
+		|| (vec_1[0] == vec_2[0] && (vec_1[1] < vec_2[1]
+			|| vec_1[1] == vec_2[1] && vec_1[2] <= vec_2[1]))) {
+		return -1;
+	}
+	return 1;
+}

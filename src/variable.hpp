@@ -101,4 +101,6 @@ extern int nb_iles;
 extern int nb_arbres;
 extern int nb_cloud;
 extern int nb_ship;
-extern int nb_ring; 
+extern int nb_ring;
+
+int compare_vec(vec3 vec_1, vec3 vec_2);

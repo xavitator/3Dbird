@@ -1,6 +1,7 @@
 
 #include "terrain.hpp"
 #include "variable.hpp"
+#include <algorithm>
 
 using namespace vcl;
 using std::vector;
@@ -233,6 +234,7 @@ vector<vec3> generate_positions_ile(int N, int taille) {
         }
         a.push_back(b);
     }
+    std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
 
@@ -285,6 +287,7 @@ vector<vec3> generate_positions_clouds(int N, int taille) {
         }
         a.push_back(b);
     }
+    std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
 
@@ -310,8 +313,9 @@ std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
         }
         a.push_back(b);
     }
+    std::sort(a.begin(), a.end(), compare_vec);
     return a;
-    return std::vector<vcl::vec3>();
+    
 }
 
 vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_ile) {
@@ -341,6 +345,7 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
         }
         a.push_back(b);
     }
+    std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
 
@@ -401,7 +406,8 @@ float ocean_height(float a, float b, int N, perlin_noise_parameters const& param
 vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
 {
     float v =1.0f;
-    float a = ((float) v *(float) timer.t + (float) position_initiale[0]) ;
+    float dt = 0.1f;
+    float a = ((float) v *(float) dt + (float) position_initiale[0]) ;
     while (a>taille/2)
     {
         a = a - taille;
@@ -409,3 +415,5 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
     position_initiale[0] = a;
     return position_initiale;
 }
+
+

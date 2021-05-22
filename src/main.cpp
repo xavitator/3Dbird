@@ -8,6 +8,7 @@
 #include "tree.hpp"
 #include "bird.hpp"
 #include "variable.hpp"
+#include "hitbox.hpp"
 
 
 #include <random>
@@ -70,11 +71,12 @@ int main(int, char* argv[])
 
 		display_interface();
 		display_scene();
-
 		ImGui::End();
 		imgui_render_frame(window);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		int a = hit_ois();
+		std::cout << a << std::endl;
 	}
 
 	imgui_cleanup();
@@ -178,11 +180,27 @@ void initialize_data()
 	ocean.texture = texture_image_id4;
 
 	create_bird();
+
+	
+
+	
 }
 
 
 void display_scene()
 {	
+	wall.transform.rotate = rotation({ 0,0,1 }, 0);
+	wall.transform.translate = { 0,0,0 };
+	draw(wall, scene);
+
+	wall.transform.translate = { 0.0f,-taille_terrain,0 };
+	draw(wall, scene);
+
+	wall.transform.rotate = rotation({ 0,0,1 }, 0.5f * M_PI);
+	wall.transform.translate = { 0.0f,0,0 };
+	draw(wall, scene);
+	wall.transform.translate = { taille_terrain,0,0 };
+	draw(wall, scene);
 	update_ocean(ocean_m, ocean, parameters);
 	for (int k = 0; k < nb_iles; k++) {
 		liste_iles[k].transform.translate = ile_position[k];
@@ -214,32 +232,35 @@ void display_scene()
 		//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
 		draw(ship, scene);
 	}
-
-	int j = 0;
+	cloud1.transform.translate = { 0,0,0 };
+	draw(cloud1, scene);
+	int j = 3;
 	for (int i = 0; i < cloud_position.size(); i++) {
+		cloud_position[i] = cloud_deplacement(cloud_position[i], taille_terrain);
 		if (j == 0) {
-			cloud1.transform.translate = cloud_deplacement(cloud_position[i],taille_terrain);
+			
+			cloud1.transform.translate = cloud_position[i];
 			cloud1.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud1, scene);
 			j++;
 		}
 		else if (j == 1) {
-			cloud2.transform.translate = cloud_deplacement(cloud_position[i], taille_terrain);
+			cloud2.transform.translate = cloud_position[i];
 			cloud2.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud2, scene);
 			j++;
 		}
 		else if (j == 2) {
-			cloud3.transform.translate = cloud_deplacement(cloud_position[i], taille_terrain);
+			cloud3.transform.translate = cloud_position[i];
 			cloud3.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud3, scene);
 			j++;
 		}
 		else if (j == 3) {
-			cloud4.transform.translate = cloud_deplacement(cloud_position[i], taille_terrain);
+			cloud4.transform.translate = cloud_position[i];
 			cloud4.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
 			draw(cloud4, scene);
-			j=0;
+			//j=0;
 		}
 	}
 	for (int i = 0; i < ring_position.size(); i++) {
@@ -250,18 +271,7 @@ void display_scene()
 	ocean.transform.translate = { 0,0,0 };
 	draw(ocean, scene);	
 
-	wall.transform.rotate = rotation({ 0,0,1 },0);
-	wall.transform.translate = { 0,0,0 };
-	draw(wall, scene);
-
-	wall.transform.translate = { 0.0f,-taille_terrain,0 };
-	draw(wall, scene);
-
-	wall.transform.rotate = rotation({ 0,0,1 }, 0.5f* M_PI);
-	wall.transform.translate = { 0.0f,0,0 };
-	draw(wall, scene);
-	wall.transform.translate = { taille_terrain,0,0 };
-	draw(wall, scene);
+	
 	
 
 	move_bird();
@@ -316,6 +326,5 @@ void opengl_uniform(GLuint shader, scene_environment const& current_scene)
 	opengl_uniform(shader, "view", current_scene.camera.matrix_view());
 	opengl_uniform(shader, "light", current_scene.light, false);
 }
-
 
 
