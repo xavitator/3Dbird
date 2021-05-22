@@ -214,16 +214,19 @@ vector<vec3> generate_positions_on_terrain(int N, perlin_noise_parameters const&
 vector<vec3> generate_positions_ile(int N, int taille) {
     std::vector<vec3> a;
 
+    vec3 b;
+    float FLOAT_MIN =-(float) taille/2+10.0f;
+    float FLOAT_MAX = (float)taille / 2 - 10.0f;
+
     for (int i = 0; i < N; i++) {
-        vec3 b;
         int c = false;
-        float FLOAT_MIN =-(float) taille/2+10.0f;
-        float FLOAT_MAX = (float)taille / 2 - 10.0f;
         while (!c) {
-            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) , 0 };
+            b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0 };
             c = true;
+            std::cout << b<< "; " << a.size() << std::endl;
             for (size_t k = 0; k < a.size(); k++) {
-                if (a[k][0] - b[0] < 20 && a[k][0] - b[0]>-20 && a[k][1] - b[1] <20 && a[k][1] - b[1]>-20) {
+                if (std::abs(a[k][0] - b[0]) < 20 
+                && std::abs(a[k][1] - b[1]) < 20) {
                     c = false;
                 }
             }
@@ -237,15 +240,15 @@ perlin_noise_parameters generate_alea_ile() {
     perlin_noise_parameters par2;
     float FLOAT_MIN = 1.7f;
     float FLOAT_MAX = 2.2f;
-    par2.frequency_gain = FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN)));
+    par2.frequency_gain = FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN);
 
     FLOAT_MIN = 0.3f;
     FLOAT_MAX = 0.4f;
-    par2.persistency = FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN)));
+    par2.persistency = FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN);
 
     FLOAT_MIN = 0.4f;
     FLOAT_MAX = 0.6f;
-    par2.terrain_height = 0.4f + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN)));
+    par2.terrain_height = 0.4f + rand_interval() * (FLOAT_MAX - FLOAT_MIN);
     return par2;
 }
 
@@ -255,7 +258,7 @@ vector<float> generate_rotation(int N)
     for (int k = 0; k < N; k++) {
         float FLOAT_MIN = 0.0f;
         float FLOAT_MAX = 3.14f;
-        b.push_back(FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))));
+        b.push_back(FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN));
     }
     return b;
 }
@@ -272,7 +275,7 @@ vector<vec3> generate_positions_clouds(int N, int taille) {
         float HEIGHT_MAX = 10.0f;
         float HEIGHT_MIN = 5.0f;
         while (!c) {
-            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) ,  HEIGHT_MIN + (float)(rand()) / ((float)(32767.0f / (HEIGHT_MAX - HEIGHT_MIN))) };
+            b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) ,  HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN) };
             c = true;
             for (size_t k = 0; k < a.size(); k++) {
                 if (a[k][0] - b[0] <5 && a[k][0] - b[0]>-5 && a[k][1] - b[1] <5 && a[k][1] - b[1]>-5) {
@@ -297,7 +300,7 @@ std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
         float HEIGHT_MAX = 10.0f;
         float HEIGHT_MIN = 0.2f;
         while (!c) {
-            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) ,  HEIGHT_MIN + (float)(rand()) / ((float)(32767.0f / (HEIGHT_MAX - HEIGHT_MIN))) };
+            b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) ,  HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN) };
             c = true;
             for (size_t k = 0; k < a.size(); k++) {
                 if (a[k][0] - b[0] <5 && a[k][0] - b[0]>-5 && a[k][1] - b[1] <5 && a[k][1] - b[1]>-5) {
@@ -323,7 +326,7 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
         float HEIGHT_MIN = 5.0f;
         float taille_ship = 8.0f;
         while (!c) {
-            b = { FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))), FLOAT_MIN + (float)(rand()) / ((float)(32767.0f / (FLOAT_MAX - FLOAT_MIN))) , 0.35f };
+            b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0.35f };
             c = true;
             for (size_t k = 0; k < a.size(); k++) {
                 if (a[k][0] - b[0] <taille_ship && a[k][0] - b[0]>-taille_ship && a[k][1] - b[1] <taille_ship && a[k][1] - b[1]>-taille_ship) {

@@ -104,6 +104,7 @@ mesh_drawable ile(perlin_noise_parameters par2) {
 
 void initialize_data()
 {
+	//srand (time(NULL));
 	GLuint const shader_mesh = opengl_create_shader_program(opengl_shader_preset("mesh_vertex"), opengl_shader_preset("mesh_fragment"));
 	GLuint const shader_uniform_color = opengl_create_shader_program(opengl_shader_preset("single_color_vertex"), opengl_shader_preset("single_color_fragment"));
 	GLuint const texture_white = opengl_texture_to_gpu(image_raw{1,1,image_color_type::rgba,{255,255,255,255}});
@@ -262,7 +263,6 @@ void display_scene()
 	wall.transform.translate = { taille_terrain,0,0 };
 	draw(wall, scene);
 	
-	draw(ring, scene);
 
 	move_bird();
 	move_camera_center();

@@ -131,7 +131,6 @@ void move_bird(){
     hierarchy_bird["body"].transform.translate += user.speed*coef_rot*t*tmp*orientation_bird;
     pos_without_oscill += user.speed*coef_rot*t*tmp*orientation_bird;
 
-    std::cout << t << std::endl;
     vec3 rot_vec;
     float rot_facteur = 0.05f;
     rotation tmpp;
