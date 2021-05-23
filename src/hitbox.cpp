@@ -217,7 +217,7 @@ int hit_ois() {
 		}
 		else {
 			float z = ocean_height(pos[0], pos[1], taille_terrain, parameters, 0.2f);
-			if (z > pos[2] - 0.2f) return 3;
+			if (z > pos[2] - 0.1f) return 3;
 			if (hit_ship() > -1) return 4;
 		}
 	}

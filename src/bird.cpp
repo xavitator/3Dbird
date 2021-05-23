@@ -112,7 +112,7 @@ void create_bird(){
     hierarchy_bird.add(shoulder_right, "shoulder_right", "body", {radius_body-0.05f,0,0});
     hierarchy_bird.add(elbow, "elbow_right", "shoulder_right", {length_arm,0,0});
     hierarchy_bird.add(arm_right, "arm_bottom_right", "elbow_right");
-
+    hierarchy_bird["body"].transform.translate = { 0,0,5 };
     pos_without_oscill = hierarchy_bird["body"].transform.translate;
 }
 
@@ -123,7 +123,7 @@ void move_bird(){
 
     timer.update();
     float t = timer.t;
-    float coef_rot = 0.01f;
+    float coef_rot = 0.001f;
     // The body oscillate along the z direction
     hierarchy_mesh_drawable_node bird = hierarchy_bird["body"];
     //hierarchy_bird["body"].transform.translate += {0,0,0.02f*(std::sin(2*3.14f*t))};
