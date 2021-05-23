@@ -287,7 +287,6 @@ vector<vec3> generate_positions_clouds(int N, int taille) {
         }
         a.push_back(b);
     }
-    std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
 
@@ -345,7 +344,6 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
         }
         a.push_back(b);
     }
-    std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
 
@@ -418,7 +416,9 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
 
 
 void generate_terrain() {
+
     ring_orientation = generate_rotation(nb_ring);
+
     ring_position = generate_positions_ring(nb_ring, taille_terrain);
     ship_position = generate_positions_ships(nb_ship, taille_terrain, ile_position);
     ship_orientation = generate_rotation(nb_ship);

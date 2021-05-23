@@ -48,10 +48,15 @@ int nb_ship = 20;
 int nb_ring = 1; 
 
 int compare_vec(vec3 vec_1, vec3 vec_2) {
+    // std::cout << "compare : " ;
+    // std::cout << vec_1 << " - ";
+    // std::cout << vec_2 << std::endl;
 	if (vec_1[0] < vec_2[0]
-		|| (vec_1[0] == vec_2[0] && (vec_1[1] < vec_2[1]
-			|| vec_1[1] == vec_2[1] && vec_1[2] <= vec_2[1]))) {
+		|| (vec_1[0] == vec_2[0] && vec_1[1] < vec_2[1])
+        || (vec_1[0] == vec_2[0] && vec_1[1] == vec_2[1] && vec_1[2] <= vec_2[2])) {
+        // std::cout << "coco" << std::endl;
 		return -1;
 	}
+    // std::cout << "colo" << std::endl;
 	return 1;
 }

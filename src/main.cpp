@@ -138,7 +138,6 @@ void initialize_data()
 	ring.shading.color = { 1.0f,0,0 };
 	ring.transform.scale = 0.5f;
 
-
 	ocean_m = create_ocean(parameters, taille_terrain);
 	ocean = mesh_drawable(ocean_m);
 	//ocean.shading.color = { 0.0f, 0.0f, 1.0f };
