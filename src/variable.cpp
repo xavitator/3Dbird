@@ -45,7 +45,7 @@ int nb_iles = 5;
 int nb_arbres = 20;
 int nb_cloud = 40;
 int nb_ship = 20;
-int nb_ring = 20; 
+int nb_ring = 1; 
 
 int compare_vec(vec3 vec_1, vec3 vec_2) {
 	if (vec_1[0] < vec_2[0]

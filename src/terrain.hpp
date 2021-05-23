@@ -27,3 +27,7 @@ void update_ocean(vcl::mesh& ocean, vcl::mesh_drawable& ocean_visual, perlin_noi
 float ocean_height(float a, float b, int N, perlin_noise_parameters const& parameters, float v_maree);
 
 vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille);
+
+void generate_terrain();
+
+mesh_drawable ile_g(perlin_noise_parameters par2);

@@ -86,23 +86,7 @@ int main(int, char* argv[])
 	return 0;
 }
 
-mesh_drawable ile(perlin_noise_parameters par2) {
-	terrain = create_terrain(par2);
-	mesh_drawable terrain_visual1 = mesh_drawable(terrain);
-	//terrain_visual1.shading.color = { 0.6f,0.85f,0.5f };
-	terrain_visual1.shading.phong.specular = 0.0f; // non-specular terrain material
 
-	image_raw const im2 = image_load_png("assets/sandgrass.png");
-
-	// Send this image to the GPU, and get its identifier texture_image_id
-	GLuint const texture_image_id2 = opengl_texture_to_gpu(im2,
-		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
-		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
-
-	terrain_visual1.texture = texture_image_id2;
-
-	return terrain_visual1;
-}
 
 void initialize_data()
 {
@@ -123,14 +107,7 @@ void initialize_data()
 	tree = mesh_drawable(create_tree());
 	
 	
-	ile_position = generate_positions_ile(nb_iles,taille_terrain);
-	ile_orientation = generate_rotation(nb_iles);
-	for (int k = 0; k < nb_iles; k++) {
-		perlin_noise_parameters par2= generate_alea_ile();
-		liste_iles.push_back(ile(par2));
-		liste_tree_position.push_back(generate_positions_on_terrain(nb_arbres, par2));
-		liste_noise_ile.push_back(par2);
-	}
+	
 	wall = mesh_drawable(create_wall(taille_terrain));
 	image_raw const im3 = image_load_png("assets/rayure1.png");
 
@@ -152,8 +129,6 @@ void initialize_data()
 	cloud3 = mesh_drawable(mesh_load_file_obj("assets/Cloud_3.obj"));
 	cloud4 = mesh_drawable(mesh_load_file_obj("assets/Cloud_4.obj"));
 
-	cloud_position = generate_positions_clouds(nb_cloud, taille_terrain);
-	cloud_orientation = generate_rotation(nb_cloud);
 	
 	ship = mesh_drawable(mesh_load_file_obj("assets/ship.obj"));
 	ship.transform.scale = 0.023f;
@@ -163,11 +138,6 @@ void initialize_data()
 	ring.shading.color = { 1.0f,0,0 };
 	ring.transform.scale = 0.5f;
 
-	ring_orientation = generate_rotation(nb_ring);
-	ring_position = generate_positions_ring(nb_ring, taille_terrain);
-
-	ship_position = generate_positions_ships(nb_ship, taille_terrain, ile_position);
-	ship_orientation = generate_rotation(nb_ship);
 
 	ocean_m = create_ocean(parameters, taille_terrain);
 	ocean = mesh_drawable(ocean_m);
@@ -180,6 +150,7 @@ void initialize_data()
 	ocean.texture = texture_image_id4;
 
 	create_bird();
+	generate_terrain();
 
 	
 

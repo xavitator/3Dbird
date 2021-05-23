@@ -417,3 +417,37 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
 }
 
 
+void generate_terrain() {
+    ring_orientation = generate_rotation(nb_ring);
+    ring_position = generate_positions_ring(nb_ring, taille_terrain);
+    ship_position = generate_positions_ships(nb_ship, taille_terrain, ile_position);
+    ship_orientation = generate_rotation(nb_ship);
+    ile_position = generate_positions_ile(nb_iles, taille_terrain);
+    ile_orientation = generate_rotation(nb_iles);
+    cloud_position = generate_positions_clouds(nb_cloud, taille_terrain);
+    cloud_orientation = generate_rotation(nb_cloud);
+    for (int k = 0; k < nb_iles; k++) {
+        perlin_noise_parameters par2 = generate_alea_ile();
+        liste_iles.push_back(ile_g(par2));
+        liste_tree_position.push_back(generate_positions_on_terrain(nb_arbres, par2));
+        liste_noise_ile.push_back(par2);
+    }
+}
+
+mesh_drawable ile_g(perlin_noise_parameters par2) {
+	terrain = create_terrain(par2);
+	mesh_drawable terrain_visual1 = mesh_drawable(terrain);
+	//terrain_visual1.shading.color = { 0.6f,0.85f,0.5f };
+	terrain_visual1.shading.phong.specular = 0.0f; // non-specular terrain material
+
+	image_raw const im2 = image_load_png("assets/sandgrass.png");
+
+	// Send this image to the GPU, and get its identifier texture_image_id
+	GLuint const texture_image_id2 = opengl_texture_to_gpu(im2,
+		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
+		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
+
+	terrain_visual1.texture = texture_image_id2;
+
+	return terrain_visual1;
+}
