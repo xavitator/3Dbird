@@ -38,7 +38,7 @@ struct user_interaction_parameters {
 	bool cursor_on_gui;
     bool display_frame = true;
 	keyboard_state_parameters keyboard_state;
-	float speed = 1.0f;
+	float speed = 0.001f;
 };
 
 struct scene_environment
@@ -48,7 +48,16 @@ struct scene_environment
 	vec3 light;
 };
 
-
+enum Collision {
+    ILE = 1,
+    TREE_ROCK,
+    OCEAN,
+    SHIP,
+    CLOUD,
+    BORDER,
+	RING,
+    CEILING
+};
 
 extern mesh terrain;
 extern mesh_drawable terrain_visual;
@@ -77,6 +86,9 @@ extern mesh_drawable cloud4;
 extern mesh_drawable ship;
 extern mesh_drawable ring;
 
+extern hierarchy_mesh_drawable hierarchy_bird;
+extern vec3 orientation_bird;
+extern vec3 pos_without_oscill;
 
 extern std::vector<vcl::vec3> tree_position;
 extern perlin_noise_parameters parameters;
@@ -102,5 +114,10 @@ extern int nb_arbres;
 extern int nb_cloud;
 extern int nb_ship;
 extern int nb_ring;
+extern float fact_rot_cam;
+extern float rot_facteur_bird;
+extern vec3 rho_theta_phi;
+extern float initial_speed;
+extern float ceiling_height;
 
 int compare_vec(vec3 vec_1, vec3 vec_2);

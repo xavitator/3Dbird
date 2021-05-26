@@ -2,7 +2,6 @@
 #include "view.hpp"
 #include "variable.hpp"
 
-vec3 rho_theta_phi = {5.0, 1.0, 1.0};
 double approx = 0.0001;
 
 void init_camera(){
@@ -26,10 +25,9 @@ void change_angle_to_non_zero(double &val){
 }
 
 void move_camera_rotation(vec2 p0, vec2 p1){
-	float fact_rot = 0.005f;
 
 	vec3 pos_bird = get_pos_bird();
-	vec2 diff_pos = fact_rot * (p0 - p1);
+	vec2 diff_pos = fact_rot_cam * (p0 - p1);
 
 	double rho = rho_theta_phi[0];
 	double theta = rho_theta_phi[1] + diff_pos[1];

@@ -21,6 +21,9 @@ mesh_drawable cloud4;
 mesh_drawable ship;
 mesh_drawable ring;
 
+hierarchy_mesh_drawable hierarchy_bird;
+vec3 orientation_bird = {0,1,0};
+vec3 pos_without_oscill;
 
 std::vector<vcl::vec3> tree_position;
 perlin_noise_parameters parameters;
@@ -46,6 +49,11 @@ int nb_arbres = 20;
 int nb_cloud = 40;
 int nb_ship = 20;
 int nb_ring = 1; 
+float fact_rot_cam = 0.005f;
+float rot_facteur_bird = 0.05f;
+vec3 rho_theta_phi = {5.0, 1.0, 1.0};
+float initial_speed = 1.01f;
+float ceiling_height = 11;
 
 int compare_vec(vec3 vec_1, vec3 vec_2) {
     // std::cout << "compare : " ;

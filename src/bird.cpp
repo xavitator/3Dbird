@@ -2,14 +2,11 @@
 #include "variable.hpp"
 #include <iostream>
 #include <typeinfo>  //for 'typeid' to work  
+#include <cmath>
 
 
 
 using namespace vcl;
-
-hierarchy_mesh_drawable hierarchy_bird;
-vec3 orientation_bird = {0,1,0};
-vec3 pos_without_oscill;
 
 void opengl_uniform(GLuint shader, scene_environment const& current_scene);
 
@@ -123,44 +120,44 @@ void move_bird(){
 
     timer.update();
     float t = timer.t;
-    float coef_rot = 0.001f;
+
     // The body oscillate along the z direction
     hierarchy_mesh_drawable_node bird = hierarchy_bird["body"];
     //hierarchy_bird["body"].transform.translate += {0,0,0.02f*(std::sin(2*3.14f*t))};
     mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
-    hierarchy_bird["body"].transform.translate += user.speed*coef_rot*t*tmp*orientation_bird;
-    pos_without_oscill += user.speed*coef_rot*t*tmp*orientation_bird;
+    vec3 ajout_translat = std::log(user.speed*t + initial_speed) * tmp * orientation_bird;
+    hierarchy_bird["body"].transform.translate += ajout_translat;
+    pos_without_oscill += ajout_translat;
 
     vec3 rot_vec;
-    float rot_facteur = 0.05f;
     rotation tmpp;
     int b = 0;
     if(user.keyboard_state.up){
         rot_vec = {1,0,0};
         b = 1;
         tmpp = hierarchy_bird["body"].transform.rotate;
-    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur_bird);
         hierarchy_bird["body"].transform.rotate = tmpp;
     }
     if(user.keyboard_state.down){
         b = 1;
         rot_vec = {-1,0,0};
         tmpp = hierarchy_bird["body"].transform.rotate;
-    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur_bird);
         hierarchy_bird["body"].transform.rotate = tmpp;
     }
     if(user.keyboard_state.right){
         b = 1;
         rot_vec = {0,0,-1};
     	tmpp = hierarchy_bird["body"].transform.rotate;
-    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur_bird);
         hierarchy_bird["body"].transform.rotate = tmpp;
     }
     if(user.keyboard_state.left){
         b = 1;
         rot_vec = {0,0,1};
     	tmpp = hierarchy_bird["body"].transform.rotate;
-    	tmpp = tmpp * rotation(rot_vec, rot_facteur);
+    	tmpp = tmpp * rotation(rot_vec, rot_facteur_bird);
         hierarchy_bird["body"].transform.rotate = tmpp;
     }
     if(! b) {

@@ -9,76 +9,6 @@
 using namespace vcl;
 using std::vector;
 
-int hit_oiseau() {
-	vec3 pos = get_pos_bird();
-	// test îles :
-	//std::cout << "position oiseau1:" << std::endl;
-	//std::cout << pos << std::endl;
-	std::cout << "liste ile:" << std::endl;
-	std::cout << ile_position[0] << std::endl;
-	std::cout << ile_position[1] << std::endl;
-	std::cout << ile_position[2] << std::endl;
-	std::cout << ile_position[3] << std::endl;
-	std::cout << ile_position[4] << std::endl;
-	int indice_ile = get_plus_proche(pos, ile_position, 10);
-	std::cout << "indice_ile" << std::endl;
-	std::cout << indice_ile<< std::endl;
-	
-	if (pos[2] < 4.0f) {
-		if (indice_ile != -1) {
-			// position par rapport à l'ile
-			float u = ((float)pos[0] - ile_position[indice_ile][0]) / 20 + 0.5f;
-			std::cout << "u"<< std::endl;
-			std::cout << u << std::endl;
-			float v = ((float)pos[1] - ile_position[indice_ile][1]) / 20 + 0.5f;
-			std::cout << "v" << std::endl;
-			std::cout << v << std::endl;
-			if (!(u > 1 || u < 0 || v>1 || v < 0)) {
-				vec3 a = evaluate_terrain(u, v, liste_noise_ile[indice_ile]);
-				std::cout << "a" << std::endl;
-				std::cout << a << std::endl;
-				if (pos[2] < a[2] +0.1f) {
-					return 1;
-				}
-			}
-			int indice_arbre = get_plus_proche(pos, liste_tree_position[indice_ile], 2);
-			if (indice_arbre != -1) {
-				vec3 pos_arbre = liste_tree_position[indice_ile][indice_arbre];
-				if (norm(pos - ile_position[indice_ile] - pos_arbre) < 3.0f) {
-					return 2;
-				}
-			}
-		}
-		// test ocean
-		int indice_ship = get_plus_proche(pos, ship_position, 4);
-		if (indice_ship != -1) {
-			vec3 pos_ship = ship_position[indice_ship];
-			if (norm(pos - pos_ship) < 4) {
-				return 3;
-			}
-		}
-		float z = ocean_height(pos[0], pos[1], taille_terrain, parameters, 0.2f);
-
-		std::cout << z << std::endl;
-		if (z > pos[2]-0.4f) {
-			return 4;
-		}
-		
-	}
-	else {
-		int indice_cloud = get_plus_proche(pos, cloud_position, 10);
-		std::cout << "indice_cloud" << std::endl;
-		std::cout << indice_cloud << std::endl;
-		//std::cout << pos << std::endl;
-		if (indice_cloud != -1) {
-			if (norm(cloud_position[indice_cloud] - pos) < 5.0f) {
-				return 5;
-			}
-		}
-	}
-	return -1;
-}
-
 int get_plus_proche(vec3 pos, vector<vec3> liste, int taille_obj) {
 	int min = 0;
 	int max = liste.size()-1;
@@ -204,30 +134,6 @@ int hit_ship() {
 	return -1;
 }
 
-int hit_ois() {
-	vec3 pos = get_pos_bird();
-	if (vcl::abs(pos[0]) > taille_terrain / 2 || vcl::abs(pos[1]) > taille_terrain / 2 || pos[2] > 11) return 6;
-	
-	if (pos[2] < 4) {
-		int indice_ile = on_ile();
-		
-		if (indice_ile > -1) {
-			if (hit_ile(indice_ile) > -1) return 1;
-			if (hit_arbre(indice_ile) > -1) return 2;
-		}
-		else {
-			float z = ocean_height(pos[0], pos[1], taille_terrain, parameters, 0.2f);
-			if (z > pos[2] - 0.1f) return 3;
-			if (hit_ship() > -1) return 4;
-		}
-	}
-	else {
-		if (hit_cloud() > -1)  return 5;
-	}
-	if (hit_cercle()>-1) return 7;
-	return -1;
-}
-
 int hit_cercle() {
 	{
 		vec3 pos = get_pos_bird();
@@ -245,4 +151,28 @@ int hit_cercle() {
 		}
 		return -1;
 	}
+}
+
+int hit_ois() {
+	vec3 pos = get_pos_bird();
+	if (vcl::abs(pos[0]) > taille_terrain / 2 || vcl::abs(pos[1]) > taille_terrain / 2) return BORDER;
+	if (pos[2] > ceiling_height) return CEILING;
+	if (pos[2] < 4) {
+		int indice_ile = on_ile();
+		
+		if (indice_ile > -1) {
+			if (hit_ile(indice_ile) > -1) return ILE;
+			if (hit_arbre(indice_ile) > -1) return TREE_ROCK;
+		}
+		else {
+			float z = ocean_height(pos[0], pos[1], taille_terrain, parameters, 0.2f);
+			if (z > pos[2] - 0.1f) return OCEAN;
+			if (hit_ship() > -1) return SHIP;
+		}
+	}
+	else {
+		if (hit_cloud() > -1)  return CLOUD;
+	}
+	if (hit_cercle()>-1) return RING;
+	return -1;
 }
