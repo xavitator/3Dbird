@@ -41,11 +41,21 @@ struct user_interaction_parameters {
 	float speed = 0.001f;
 };
 
+struct shadow_map_parameters 
+{
+	GLuint texture;
+	int width;
+	int height;
+	GLuint fbo;
+	GLuint shader;
+};
+
 struct scene_environment
 {
 	camera_around_center camera;
 	mat4 projection;
-	vec3 light;
+	camera_spherical_coordinates light;
+	shadow_map_parameters depth_map;
 };
 
 enum Collision {
@@ -120,5 +130,7 @@ extern float rot_facteur_bird;
 extern vec3 rho_theta_phi;
 extern float initial_speed;
 extern float ceiling_height;
+extern int const width;
+extern int const height;
 
 int compare_vec(vec3 vec_1, vec3 vec_2);

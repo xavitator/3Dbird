@@ -176,8 +176,7 @@ void move_bird(){
 	// update the global coordinates
 	hierarchy_bird.update_local_to_global_coordinates();
 	// display the hierarchy_bird
-	if(user.gui.display_surface)
-		draw(hierarchy_bird, scene);
+	draw(hierarchy_bird, scene);
 	if(user.gui.display_wireframe)
 		draw_wireframe(hierarchy_bird, scene);
 }

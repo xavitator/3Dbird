@@ -9,9 +9,11 @@
 #include "bird.hpp"
 #include "variable.hpp"
 #include "hitbox.hpp"
+#include "shadow_map.hpp"
 
 
 #include <random>
+#include <functional>
 #include <math.h>
 
 using namespace vcl;
@@ -31,7 +33,6 @@ int main(int, char* argv[])
 {
 	std::cout << "Run " << argv[0] << std::endl;
 
-	int const width = 1280, height = 1024;
 	GLFWwindow* window = create_window(width, height);
 	window_size_callback(window, width, height);
 	std::cout << opengl_info_display() << std::endl;;
@@ -52,10 +53,10 @@ int main(int, char* argv[])
 	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window))
 	{
-		scene.light = scene.camera.position();
+		// scene.light = scene.camera.position();
 		user.fps_record.update();
 		
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(189 / 255.0f, 217 / 255.0f, 242 / 255.0f, 0.95f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		imgui_create_frame();
@@ -71,13 +72,14 @@ int main(int, char* argv[])
 
 		display_interface();
 		display_scene();
+
 		ImGui::End();
 		imgui_render_frame(window);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		int a = hit_ois();
-		std::cout << a << std::endl;
-		}
+		// std::cout << a << std::endl;
+	}
 
 	imgui_cleanup();
 	glfwDestroyWindow(window);
@@ -91,7 +93,7 @@ int main(int, char* argv[])
 void initialize_data()
 {
 	//srand (time(NULL));
-	GLuint const shader_mesh = opengl_create_shader_program(opengl_shader_preset("mesh_vertex"), opengl_shader_preset("mesh_fragment"));
+	GLuint const shader_mesh = opengl_create_shader_program(read_text_file("shader/mesh_with_shadow.vert.glsl"), read_text_file("shader/mesh_with_shadow.frag.glsl"));
 	GLuint const shader_uniform_color = opengl_create_shader_program(opengl_shader_preset("single_color_vertex"), opengl_shader_preset("single_color_fragment"));
 	GLuint const texture_white = opengl_texture_to_gpu(image_raw{1,1,image_color_type::rgba,{255,255,255,255}});
 	mesh_drawable::default_shader = shader_mesh;
@@ -99,9 +101,17 @@ void initialize_data()
 	curve_drawable::default_shader = shader_uniform_color;
 	segments_drawable::default_shader = shader_uniform_color;
 	
+	// Initialize the light position and viewpoint
+	scene.projection = projection_orthographic(-10,10,-10,10,0,30); // orthographic projection for simplicity
+	scene.light.distance_to_center = 20.0f;
+	scene.light.manipulator_rotate_spherical_coordinates(pi/4.0f, pi/4.0f);
+
 	user.global_frame = mesh_drawable(mesh_primitive_frame());
 	user.gui.display_frame = false;
 	init_camera();
+
+	// Initialize the FBO and texture used to handle the depth map
+	scene.depth_map = initialize_depth_map();
 
     // Create visual terrain surface
 	tree = mesh_drawable(create_tree());
@@ -157,9 +167,105 @@ void initialize_data()
 	
 }
 
+using draw_func = std::function<void(mesh_drawable const& drawable, scene_environment const& current_scene)>;
 
 void display_scene()
 {	
+	update_ocean(ocean_m, ocean, parameters);
+
+	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
+		for (int k = 0; k < nb_iles; k++) {
+			liste_iles[k].transform.translate = ile_position[k];
+			//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
+			draw_element(liste_iles[k], scene);
+			int j = 0;
+			for (int i = 0; i < nb_arbres; i++) {
+				if (j < 2) {
+					tree.transform.translate = liste_tree_position[k][i];
+					tree.transform.translate += ile_position[k];
+					draw_element(tree, scene);
+					//ocean.transform.translate = { 0,0,10*i };
+					//draw_element(ocean, scene);
+					j++;
+				}
+				else
+				{
+					j = 0;
+					caillou.transform.translate = liste_tree_position[k][i];
+					caillou.transform.translate += ile_position[k] - vec3({0, 0, 0.1f});
+					draw_element(caillou, scene);
+				}
+			}
+		}
+		for (int k = 0; k< nb_ship; k++) {
+			ship.transform.translate = ship_position[k];
+			ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, v_maree) * 0.8f};
+			ship.transform.rotate = rotation({ { cos(ship_orientation[k]),0,sin(ship_orientation[k]) }, { sin(ship_orientation[k]),0,-cos(ship_orientation[k]) },{0,1,0} });
+			//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
+			draw_element(ship, scene);
+		}
+		for (int i = 0; i < ring_position.size(); i++) {
+			std::cout << ring_position[i] << std::endl;
+			ring.transform.translate = ring_position[i];
+			ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
+			draw_element(ring, scene);
+		}
+
+		cloud1.transform.translate = { 0,0,0 };
+		draw_element(cloud1, scene);
+		int j = 3;
+		for (int i = 0; i < cloud_position.size(); i++) {
+			cloud_position[i] = cloud_deplacement(cloud_position[i], taille_terrain);
+			if (j == 0) {
+				
+				cloud1.transform.translate = cloud_position[i];
+				cloud1.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
+				draw_element(cloud1, scene);
+				j++;
+			}
+			else if (j == 1) {
+				cloud2.transform.translate = cloud_position[i];
+				cloud2.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
+				draw_element(cloud2, scene);
+				j++;
+			}
+			else if (j == 2) {
+				cloud3.transform.translate = cloud_position[i];
+				cloud3.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
+				draw_element(cloud3, scene);
+				j++;
+			}
+			else if (j == 3) {
+				cloud4.transform.translate = cloud_position[i];
+				cloud4.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
+				draw_element(cloud4, scene);
+				//j=0;
+			}
+		}
+		ocean.transform.translate = { 0,0,0 };
+		draw_element(ocean, scene);	
+	};
+
+	// First pass: Draw all shapes that cast shadows
+	{
+		glViewport(0, 0, scene.depth_map.width, scene.depth_map.height);
+		glBindFramebuffer(GL_FRAMEBUFFER, scene.depth_map.fbo); opengl_check;
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		draw_all(draw_depth_map);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0); opengl_check;
+		
+	}
+
+	// Second pass: Draw all shapes that receives shadows
+	{
+		glViewport(0, 0, width, height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		draw_all(draw_with_shadow);
+
+	}
 	wall.transform.rotate = rotation({ 0,0,1 }, 0);
 	wall.transform.translate = { 0,0,0 };
 	draw(wall, scene);
@@ -172,79 +278,7 @@ void display_scene()
 	draw(wall, scene);
 	wall.transform.translate = { taille_terrain,0,0 };
 	draw(wall, scene);
-	update_ocean(ocean_m, ocean, parameters, v_maree);
-	for (int k = 0; k < nb_iles; k++) {
-		liste_iles[k].transform.translate = ile_position[k];
-		//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
-		draw(liste_iles[k], scene);
-		int j = 0;
-		for (int i = 0; i < nb_arbres; i++) {
-			if (j < 2) {
-				tree.transform.translate = liste_tree_position[k][i];
-				tree.transform.translate += ile_position[k];
-				draw(tree, scene);
-				//ocean.transform.translate = { 0,0,10*i };
-				//draw(ocean, scene);
-				j++;
-			}
-			else
-			{
-				j = 0;
-				caillou.transform.translate = liste_tree_position[k][i];
-				caillou.transform.translate += ile_position[k] - vec3({0, 0, 0.1f});
-				draw(caillou, scene);
-			}
-		}
-	}
-	for (int k = 0; k< nb_ship; k++) {
-		ship.transform.translate = ship_position[k];
-		ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, v_maree) *0.8f};
-		ship.transform.rotate = rotation({ { cos(ship_orientation[k]),0,sin(ship_orientation[k]) }, { sin(ship_orientation[k]),0,-cos(ship_orientation[k]) },{0,1,0} });
-		//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
-		draw(ship, scene);
-	}
-	cloud1.transform.translate = { 0,0,0 };
-	draw(cloud1, scene);
-	int j = 3;
-	for (int i = 0; i < cloud_position.size(); i++) {
-		cloud_position[i] = cloud_deplacement(cloud_position[i], taille_terrain);
-		if (j == 0) {
-			
-			cloud1.transform.translate = cloud_position[i];
-			cloud1.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
-			draw(cloud1, scene);
-			j++;
-		}
-		else if (j == 1) {
-			cloud2.transform.translate = cloud_position[i];
-			cloud2.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
-			draw(cloud2, scene);
-			j++;
-		}
-		else if (j == 2) {
-			cloud3.transform.translate = cloud_position[i];
-			cloud3.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
-			draw(cloud3, scene);
-			j++;
-		}
-		else if (j == 3) {
-			cloud4.transform.translate = cloud_position[i];
-			cloud4.transform.rotate = rotation({ 0,0,1 }, cloud_orientation[i]);
-			draw(cloud4, scene);
-			//j=0;
-		}
-	}
-	for (int i = 0; i < ring_position.size(); i++) {
-		ring.transform.translate = ring_position[i];
-		ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
-		draw(ring, scene);
-	}
-	ocean.transform.translate = { 0,0,0 };
-	draw(ocean, scene);	
-
 	
-	
-
 	move_bird();
 	move_camera_center();
 }
@@ -295,7 +329,8 @@ void opengl_uniform(GLuint shader, scene_environment const& current_scene)
 {
 	opengl_uniform(shader, "projection", current_scene.projection);
 	opengl_uniform(shader, "view", current_scene.camera.matrix_view());
-	opengl_uniform(shader, "light", current_scene.light, false);
+	opengl_uniform(shader, "light", current_scene.light.matrix_view());
+	opengl_uniform(shader, "projection", current_scene.projection);
 }
 
 
