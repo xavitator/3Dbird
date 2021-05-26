@@ -55,7 +55,7 @@ float initial_speed = 1.01f;
 float ceiling_height = 11;
 int nb_ring = 100;
 float v_maree = 0.1f;
-int const width = 1280, height = 1024;
+int width = 1280, height = 1024;
 
 int compare_vec(vec3 vec_1, vec3 vec_2) {
     // std::cout << "compare : " ;

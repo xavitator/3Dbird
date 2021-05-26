@@ -289,8 +289,10 @@ void display_interface()
 	
 }
 
-void window_size_callback(GLFWwindow* , int width, int height)
+void window_size_callback(GLFWwindow* , int n_width, int n_height)
 {
+	width = n_width;
+	height = n_height;
 	glViewport(0, 0, width, height);
 	float const aspect = width / static_cast<float>(height);
 	scene.projection = projection_perspective(50.0f*pi/180.0f, aspect, 0.1f, 100.0f);

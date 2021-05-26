@@ -130,7 +130,7 @@ extern float rot_facteur_bird;
 extern vec3 rho_theta_phi;
 extern float initial_speed;
 extern float ceiling_height;
-extern int const width;
-extern int const height;
+extern int width;
+extern int height;
 
 int compare_vec(vec3 vec_1, vec3 vec_2);
