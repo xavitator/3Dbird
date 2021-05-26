@@ -21,28 +21,19 @@ int get_plus_proche(vec3 pos, vector<vec3> liste, int taille_obj) {
 	for (int k = 0; k < 3; k++) {
 		a = min;
 		b = max;
-		//std::cout << b << std::endl;
 		while (a < b) {
 			c =(a + b) / 2;
-			//std::cout << c << std::endl;
 			if (liste[c][k] > (float)pos[k] - taille_obj) {
 				b = c;
 			}
 			else {
 				a = c + 1;
-				//std::cout << "a" << std::endl;
 			}
 		}
-		//std::cout << "position objet:"<< std::endl;
-		//std::cout << liste[a][k] << std::endl;
-		//std::cout << "position oiseau:" << std::endl;
-		//std::cout << pos << std::endl;
-		//std::cout << pos[k] + taille_obj << std::endl;
 		if (liste[a][k] > pos[k] + taille_obj) {
 			return -1;
 		}
 		min = a;
-		//std::cout << "min" << std::endl;
 		b = liste.size() - 1;
 		while (a < b) {
 			int c = (a + b) / 2 + 1;
@@ -52,11 +43,7 @@ int get_plus_proche(vec3 pos, vector<vec3> liste, int taille_obj) {
 			}
 			else {
 				b = c-1;
-				//std::cout << "bbbbb" << std::endl;
 			}
-			//std::cout << "c" << std::endl;
-			//std::cout << a << std::endl;
-			//std::cout << b << std::endl;
 		}
 		max = b;
 	}
@@ -71,8 +58,6 @@ int get_plus_proche(vec3 pos, vector<vec3> liste, int taille_obj) {
 			index = k;
 		}
 	}
-	//std::cout << "index" << std::endl;
-	//std::cout << index << std::endl;
 	return index;
 }
 

@@ -109,13 +109,10 @@ void initialize_data()
 	user.global_frame = mesh_drawable(mesh_primitive_frame());
 	user.gui.display_frame = false;
 	init_camera();
-
 	// Initialize the FBO and texture used to handle the depth map
 	scene.depth_map = initialize_depth_map();
-
     // Create visual terrain surface
 	tree = mesh_drawable(create_tree());
-	
 	
 	
 	wall = mesh_drawable(create_wall(taille_terrain));
@@ -157,9 +154,9 @@ void initialize_data()
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
 
 	ocean.texture = texture_image_id4;
-	ocean.shading.phong.specular= 10;
 
 	create_bird();
+
 	generate_terrain();
 
 	
@@ -171,8 +168,8 @@ using draw_func = std::function<void(mesh_drawable const& drawable, scene_enviro
 
 void display_scene()
 {	
+	
 	update_ocean(ocean_m, ocean, parameters, v_maree);
-
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
 		for (int k = 0; k < nb_iles; k++) {
 			liste_iles[k].transform.translate = ile_position[k];

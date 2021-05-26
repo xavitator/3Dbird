@@ -6,13 +6,13 @@ shadow_map_parameters initialize_depth_map()
 {
 	GLuint texture;
 	GLuint fbo;
-	int width = 1024;
-	int height = 1024;
+	int s_width = 1024;
+	int s_height = 1024;
 
 	// Initialize texture
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL); 
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, s_width, s_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL); 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -36,7 +36,7 @@ shadow_map_parameters initialize_depth_map()
 	// Read the shader used to compute the depth map
 	GLuint shader = opengl_create_shader_program( read_text_file("shader/depth_map.vert.glsl"), read_text_file("shader/depth_map.frag.glsl"));
 
-	return shadow_map_parameters{texture, width, height, fbo, shader};
+	return shadow_map_parameters{texture, s_width, s_height, fbo, shader};
 }
 
 

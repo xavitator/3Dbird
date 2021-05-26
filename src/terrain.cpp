@@ -312,7 +312,7 @@ std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
         }
         a.push_back(b);
     }
-    std::sort(a.begin(), a.end(), compare_vec);
+    //std::sort(a.begin(), a.end(), compare_vec);
     return a;
     
 }
@@ -399,7 +399,6 @@ float ocean_height(float a, float b, int N, perlin_noise_parameters const& param
     // Compute the Perlin noise
     float const noise = noise_perlin({ std::sin(timer.t * v_maree + v), std::cos(timer.t * v_maree + u) }, 4, std::min(parameters.persistency+ timer.t * 0.01f,0.7f), parameters.frequency_gain);
     //float const h = std::cos(timer.t * 5.0f + u*50+v*50) + std::sin(timer.t * 5.0f + v*50+u*50);
-    //std::cout << noise*0.1f << std::endl;
     //return std::max(0.01f,  (h+1)*0.01f);
     return std::max(0.01f, ((noise-1)*0.1f+0.08f- std::min(parameters.persistency + timer.t * 0.01f, 0.7f)*0.08f)*10);
 }
