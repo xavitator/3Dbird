@@ -171,7 +171,7 @@ using draw_func = std::function<void(mesh_drawable const& drawable, scene_enviro
 
 void display_scene()
 {	
-	update_ocean(ocean_m, ocean, parameters);
+	update_ocean(ocean_m, ocean, parameters, v_maree);
 
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
 		for (int k = 0; k < nb_iles; k++) {
@@ -199,18 +199,11 @@ void display_scene()
 		}
 		for (int k = 0; k< nb_ship; k++) {
 			ship.transform.translate = ship_position[k];
-			ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, v_maree) * 0.8f};
+			ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, v_maree) *0.8f};
 			ship.transform.rotate = rotation({ { cos(ship_orientation[k]),0,sin(ship_orientation[k]) }, { sin(ship_orientation[k]),0,-cos(ship_orientation[k]) },{0,1,0} });
 			//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
 			draw_element(ship, scene);
 		}
-		for (int i = 0; i < ring_position.size(); i++) {
-			std::cout << ring_position[i] << std::endl;
-			ring.transform.translate = ring_position[i];
-			ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
-			draw_element(ring, scene);
-		}
-
 		cloud1.transform.translate = { 0,0,0 };
 		draw_element(cloud1, scene);
 		int j = 3;
@@ -242,11 +235,16 @@ void display_scene()
 				//j=0;
 			}
 		}
+		for (int i = 0; i < ring_position.size(); i++) {
+			ring.transform.translate = ring_position[i];
+			ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
+			draw_element(ring, scene);
+		}
 		ocean.transform.translate = { 0,0,0 };
 		draw_element(ocean, scene);	
 	};
 
-	// First pass: Draw all shapes that cast shadows
+	// First pass: draw all shapes that cast shadows
 	{
 		glViewport(0, 0, scene.depth_map.width, scene.depth_map.height);
 		glBindFramebuffer(GL_FRAMEBUFFER, scene.depth_map.fbo); opengl_check;
