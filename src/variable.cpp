@@ -48,12 +48,14 @@ int nb_iles = 5;
 int nb_arbres = 20;
 int nb_cloud = 40;
 int nb_ship = 20;
-int nb_ring = 1; 
+
 float fact_rot_cam = 0.005f;
 float rot_facteur_bird = 0.05f;
 vec3 rho_theta_phi = {5.0, 1.0, 1.0};
 float initial_speed = 1.01f;
 float ceiling_height = 11;
+int nb_ring = 100;
+float v_maree = 0.1f;
 
 int compare_vec(vec3 vec_1, vec3 vec_2) {
     // std::cout << "compare : " ;

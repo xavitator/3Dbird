@@ -142,11 +142,6 @@ int hit_cercle() {
 			float theta = ring_orientation[j];
 			float x1 = cos(theta) * (pos[0] - ring_position[j][0]) + sin(theta) * (pos[1] - ring_position[j][1]);
 			float x2 = -sin(theta) * (pos[0] - ring_position[j][0]) + cos(theta) * (pos[1] - ring_position[j][1]);
-
-			std::cout << "b[2] - pos[2]" << std::endl;
-			std::cout << x1 << std::endl;
-			std::cout << x2 << std::endl;
-			std::cout << x1*x1+(b[2]-pos[2])* (b[2] - pos[2]) << std::endl;
 			if (x1*x1+(b[2]-pos[2])* (b[2] - pos[2])<1.0f && vcl::abs(x2)<0.1f) return 1;
 		}
 		return -1;

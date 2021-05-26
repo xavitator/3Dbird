@@ -129,8 +129,8 @@ mesh create_ocean(perlin_noise_parameters const& parameters, int taille) {
             // Compute local parametric coordinates (u,v) \in [0,1]
             const float u = ku / (N - 1.0f);
             const float v = kv / (N - 1.0f);
-            float v_maree = 0.0005f;
-            float const noise = noise_perlin({ std::sin(timer.t*v_maree+v), std::cos(timer.t * v_maree +u) }, parameters.octave , parameters.persistency , parameters.frequency_gain);
+            
+            float const noise = noise_perlin({ std::sin(timer.t*v_maree*0+v), std::cos(timer.t * v_maree*0 +u) }, parameters.octave , parameters.persistency , parameters.frequency_gain);
 
             // Compute the local surface function
         
@@ -325,19 +325,19 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
         int c = false;
         float FLOAT_MIN = -(float)taille / 2;
         float FLOAT_MAX = (float)taille / 2;
-        float HEIGHT_MAX = 10.0f;
-        float HEIGHT_MIN = 5.0f;
         float taille_ship = 8.0f;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0.35f };
             c = true;
+            std::cout << "aaaaa" << std::endl;
             for (size_t k = 0; k < a.size(); k++) {
                 if (a[k][0] - b[0] <taille_ship && a[k][0] - b[0]>-taille_ship && a[k][1] - b[1] <taille_ship && a[k][1] - b[1]>-taille_ship) {
                     c = false;
                 }
             }
             for (size_t k = 0; k < position_ile.size(); k++) {
-                if (position_ile[k][0] - b[0] < 15 && position_ile[k][0] - b[0]>-15 && position_ile[k][1] - b[1] <15 && position_ile[k][1] - b[1]>-15) {
+                std::cout << std::abs(position_ile[k][0] - b[0]) << std::endl;
+                if (std::abs(position_ile[k][0] - b[0]) < 15 && std::abs(position_ile[k][1] - b[1]) <15 ) {
                     c = false;
                 }
             }
@@ -348,7 +348,7 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
 }
 
 
-void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters)
+void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters, float v_maree)
 {
     timer.update();
 
@@ -369,13 +369,13 @@ void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_paramet
             
 
             // use the noise as height value
-            ocean.position[idx].z = ocean_height(ku, kv, N, parameters, 0.2f);
+            ocean.position[idx].z = ocean_height(ku, kv, N, parameters, v_maree);
 
-            float v_maree = 0.02f;
+    
             // use also the noise as color value
             //ocean.color[idx] = 1-ocean_height(ku, kv, N, parameters) * vec3(0, 0, 0.5f) + ocean_height(ku, kv, N, parameters) * vec3(1, 1, 1)*100;
             //ocean.color[idx] = (1 - ocean_height(ku*20+ (float)(rand())/ 32767.0f*5, kv*20+(float)(rand()) / 32767.0f*5 , N, parameters)*0.3f) * vec3(0, 0, 1.0f)+ ocean_height(ku*20+(float)(rand()) / 32767.0f * 5, kv*20+ (float)(rand()) / 32767.0f * 5, N, parameters) * vec3(1, 1, 1) *0.3f;
-            ocean.color[idx] =  vec3(0.75f, 0.75f, 0.75f) + ( ocean_height(ku, kv, N, parameters, 0.2f) * vec3(1, 1, 1)-0.46f);
+            ocean.color[idx] = vec3(0.75f, 0.75f, 0.75f) +0.7f* ( ocean_height(ku, kv, N, parameters, 0.1f) * vec3(1, 1, 1));
             
         }
     }
@@ -397,8 +397,11 @@ float ocean_height(float a, float b, int N, perlin_noise_parameters const& param
     int const idx = a * N + b;
     
     // Compute the Perlin noise
-    float const noise = noise_perlin({ std::sin(timer.t * v_maree + v), std::cos(timer.t * v_maree + u) }, parameters.octave, parameters.persistency, parameters.frequency_gain);
-    return std::max(0.01f, parameters.terrain_height * noise *5);
+    float const noise = noise_perlin({ std::sin(timer.t * v_maree + v), std::cos(timer.t * v_maree + u) }, 4, std::min(parameters.persistency+ timer.t * 0.01f,0.7f), parameters.frequency_gain);
+    //float const h = std::cos(timer.t * 5.0f + u*50+v*50) + std::sin(timer.t * 5.0f + v*50+u*50);
+    //std::cout << noise*0.1f << std::endl;
+    //return std::max(0.01f,  (h+1)*0.01f);
+    return std::max(0.01f, ((noise-1)*0.1f+0.08f- std::min(parameters.persistency + timer.t * 0.01f, 0.7f)*0.08f)*10);
 }
 
 vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
@@ -416,14 +419,12 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
 
 
 void generate_terrain() {
-
     ring_orientation = generate_rotation(nb_ring);
-
+    ile_position = generate_positions_ile(nb_iles, taille_terrain);
+    ile_orientation = generate_rotation(nb_iles);
     ring_position = generate_positions_ring(nb_ring, taille_terrain);
     ship_position = generate_positions_ships(nb_ship, taille_terrain, ile_position);
     ship_orientation = generate_rotation(nb_ship);
-    ile_position = generate_positions_ile(nb_iles, taille_terrain);
-    ile_orientation = generate_rotation(nb_iles);
     cloud_position = generate_positions_clouds(nb_cloud, taille_terrain);
     cloud_orientation = generate_rotation(nb_cloud);
     for (int k = 0; k < nb_iles; k++) {

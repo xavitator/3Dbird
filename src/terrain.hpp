@@ -23,7 +23,7 @@ std::vector<vcl::vec3> generate_positions_ships(int N, int taille, std::vector<v
 perlin_noise_parameters generate_alea_ile();
 std::vector<float> generate_rotation(int N);
 vcl::mesh create_wall(int taille);
-void update_ocean(vcl::mesh& ocean, vcl::mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters);
+void update_ocean(vcl::mesh& ocean, vcl::mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters,float v_maree);
 float ocean_height(float a, float b, int N, perlin_noise_parameters const& parameters, float v_maree);
 
 vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille);

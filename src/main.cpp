@@ -77,7 +77,7 @@ int main(int, char* argv[])
 		glfwPollEvents();
 		int a = hit_ois();
 		std::cout << a << std::endl;
-	}
+		}
 
 	imgui_cleanup();
 	glfwDestroyWindow(window);
@@ -147,6 +147,7 @@ void initialize_data()
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
 
 	ocean.texture = texture_image_id4;
+	ocean.shading.phong.specular= 10;
 
 	create_bird();
 	generate_terrain();
@@ -171,7 +172,7 @@ void display_scene()
 	draw(wall, scene);
 	wall.transform.translate = { taille_terrain,0,0 };
 	draw(wall, scene);
-	update_ocean(ocean_m, ocean, parameters);
+	update_ocean(ocean_m, ocean, parameters, v_maree);
 	for (int k = 0; k < nb_iles; k++) {
 		liste_iles[k].transform.translate = ile_position[k];
 		//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
@@ -197,7 +198,7 @@ void display_scene()
 	}
 	for (int k = 0; k< nb_ship; k++) {
 		ship.transform.translate = ship_position[k];
-		ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, 0.2f) * 0.8f};
+		ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, v_maree) *0.8f};
 		ship.transform.rotate = rotation({ { cos(ship_orientation[k]),0,sin(ship_orientation[k]) }, { sin(ship_orientation[k]),0,-cos(ship_orientation[k]) },{0,1,0} });
 		//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
 		draw(ship, scene);

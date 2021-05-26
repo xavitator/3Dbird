@@ -24,10 +24,10 @@ struct keyboard_state_parameters{
 
 struct perlin_noise_parameters
 {
-	float persistency = 0.368f;
-	float frequency_gain = 2.9f;
+	float persistency = 0.28f;
+	float frequency_gain = 2.5f;
 	int octave = 8;
-	float terrain_height = 0.114f;
+	float terrain_height = 0.104f;
 };
 
 struct user_interaction_parameters {
@@ -114,6 +114,7 @@ extern int nb_arbres;
 extern int nb_cloud;
 extern int nb_ship;
 extern int nb_ring;
+extern float v_maree;
 extern float fact_rot_cam;
 extern float rot_facteur_bird;
 extern vec3 rho_theta_phi;
