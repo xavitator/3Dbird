@@ -113,6 +113,19 @@ void create_bird(){
     pos_without_oscill = hierarchy_bird["body"].transform.translate;
 }
 
+void come_back_to_earth(){
+    mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
+
+    vec3 direction = tmp * orientation_bird;
+
+    vec3 perpend =  tmp * orthogonal_vector(orientation_bird);
+
+    if(direction[2] > 0){
+        rotation tmp_rot = hierarchy_bird["body"].transform.rotate;
+        hierarchy_bird["body"].transform.rotate = tmp_rot * rotation(perpend, 2 * rot_facteur_bird);
+    }
+}
+
 void move_bird(){
     /** *************************************************************  **/
     /** Compute the (animated) transformations applied to the elements **/
@@ -121,13 +134,9 @@ void move_bird(){
     timer.update();
     float t = timer.t;
 
+
     // The body oscillate along the z direction
     hierarchy_mesh_drawable_node bird = hierarchy_bird["body"];
-    //hierarchy_bird["body"].transform.translate += {0,0,0.02f*(std::sin(2*3.14f*t))};
-    mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
-    vec3 ajout_translat = std::log(user.speed*t + initial_speed) * tmp * orientation_bird;
-    hierarchy_bird["body"].transform.translate += ajout_translat;
-    pos_without_oscill += ajout_translat;
 
     vec3 rot_vec;
     rotation tmpp;
@@ -160,9 +169,26 @@ void move_bird(){
     	tmpp = tmpp * rotation(rot_vec, rot_facteur_bird);
         hierarchy_bird["body"].transform.rotate = tmpp;
     }
+
+
+    if(pos_without_oscill[2] > ceiling_height){
+        come_back_to_earth();
+    }
+
+    // apply next step for the bird
+    mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
+    vec3 ajout_translat = std::log(user.speed*t + initial_speed) * tmp * orientation_bird;
+    hierarchy_bird["body"].transform.translate += ajout_translat;
+    pos_without_oscill += ajout_translat;
+
     if(! b) {
         hierarchy_bird["body"].transform.translate += tmp * vec3(0,0,0.02f*(std::sin(2*3.14f*t)));
     }
+
+
+
+
+    
 	// Rotation of the shoulder-left around the y axis
     hierarchy_bird["shoulder_left"].transform.rotate   = rotation({0,0,1}, std::sin(2*3.14f*(t-0.4f)) );
 	// Rotation of the arm-left around the y axis (delayed with respect to the shoulder)
