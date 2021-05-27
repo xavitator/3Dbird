@@ -171,6 +171,8 @@ void display_scene()
 	
 	update_ocean(ocean_m, ocean, parameters, v_maree);
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
+		ocean.transform.translate = { 0,0,0 };
+		draw_element(ocean, scene);	
 		for (int k = 0; k < nb_iles; k++) {
 			liste_iles[k].transform.translate = ile_position[k];
 			//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
@@ -237,8 +239,7 @@ void display_scene()
 			ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
 			draw_element(ring, scene);
 		}
-		ocean.transform.translate = { 0,0,0 };
-		draw_element(ocean, scene);	
+		
 	};
 
 	// First pass: draw all shapes that cast shadows
