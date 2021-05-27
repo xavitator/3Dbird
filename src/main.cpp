@@ -102,7 +102,6 @@ void initialize_data()
 	segments_drawable::default_shader = shader_uniform_color;
 	
 	// Initialize the light position and viewpoint
-	scene.projection = projection_orthographic(-10,10,-10,10,0,30); // orthographic projection for simplicity
 	scene.light.distance_to_center = 20.0f;
 	scene.light.manipulator_rotate_spherical_coordinates(pi/4.0f, pi/4.0f);
 
@@ -173,6 +172,7 @@ void display_scene()
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
 		ocean.transform.translate = { 0,0,0 };
 		draw_element(ocean, scene);	
+		
 		for (int k = 0; k < nb_iles; k++) {
 			liste_iles[k].transform.translate = ile_position[k];
 			//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
@@ -325,7 +325,6 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 
 void opengl_uniform(GLuint shader, scene_environment const& current_scene)
 {
-	opengl_uniform(shader, "projection", current_scene.projection);
 	opengl_uniform(shader, "view", current_scene.camera.matrix_view());
 	opengl_uniform(shader, "light", current_scene.light.matrix_view());
 	opengl_uniform(shader, "projection", current_scene.projection);
