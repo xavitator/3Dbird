@@ -136,17 +136,6 @@ void initialize_data()
 	tree = mesh_drawable(create_tree());
 	
 	
-	wall = mesh_drawable(create_wall());
-	image_raw const im3 = image_load_png("assets/rayure1.png");
-
-	// Send this image to the GPU, and get its identifier texture_image_id
-	GLuint const texture_image_id3 = opengl_texture_to_gpu(im3,
-		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
-		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
-
-	wall.texture = texture_image_id3;
-	wall.shading.alpha = 0.5f;
-
 	caillou = mesh_drawable(mesh_load_file_obj("assets/caillou.obj"));
 	caillou.shading.color={0.63f,0.63f,0.63f};
 	caillou.transform.scale = 100;
@@ -183,7 +172,6 @@ void initialize_data()
 
 	restart_game();
 
-	
 
 	
 }

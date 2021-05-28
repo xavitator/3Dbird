@@ -171,9 +171,6 @@ mesh create_ocean(perlin_noise_parameters const& parameters) {
 
 mesh create_wall() {
    
-
-    const unsigned int N = 100;
-
     mesh terrain_ile; // temporary terrain storage (CPU only)
     terrain_ile.position.resize(2 * 2);
     terrain_ile.uv.resize(2 * 2);
@@ -181,8 +178,8 @@ mesh create_wall() {
     vec3 p = { t ,t,0 };
     terrain_ile.position[0] = p;
     terrain_ile.position[1] = { -t,t,0 };
-    terrain.position[2] = { t,t, ceiling_height };
-    terrain.position[3] = { -t,t, ceiling_height };
+    terrain_ile.position[2] = { t,t, ceiling_height };
+    terrain_ile.position[3] = { -t,t, ceiling_height };
     const uint3 triangle_1 = { 0,   1 , 2 };
     const uint3 triangle_2 = { 1,   2 , 3 };
     terrain_ile.connectivity.push_back(triangle_1);
@@ -442,11 +439,15 @@ void generate_terrain() {
     cloud_position = generate_positions_clouds();
     cloud_orientation = generate_rotation(nb_cloud);
 
-    ring_position.clear();
-    ring_position.clear();
-
     wall.clear();
     wall = mesh_drawable(create_wall());
+    image_raw const im3 = image_load_png("assets/rayure1.png");
+	// Send this image to the GPU, and get its identifier texture_image_id
+	GLuint const texture_image_id3 = opengl_texture_to_gpu(im3,
+		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
+		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
+	wall.texture = texture_image_id3;
+	wall.shading.alpha = 0.5f;
 
     liste_iles.clear();
     liste_tree_position.clear();
