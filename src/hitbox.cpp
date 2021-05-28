@@ -128,17 +128,25 @@ int hit_ship() {
 	return -1;
 }
 
-int hit_cercle() {
+int hit_ring() {
 	{
 		vec3 pos = get_pos_bird();
-		for (int j = 0; j < ring_position.size(); j++) {
-			vec3 b = ring_position[j];
-			float theta = ring_orientation[j];
-			float x1 = cos(theta) * (pos[0] - ring_position[j][0]) + sin(theta) * (pos[1] - ring_position[j][1]);
-			float x2 = -sin(theta) * (pos[0] - ring_position[j][0]) + cos(theta) * (pos[1] - ring_position[j][1]);
-			if (x1*x1+(b[2]-pos[2])* (b[2] - pos[2])<1.0f && vcl::abs(x2)<0.1f) return 1;
+		for (int j = 0; j < ring_objects.size(); j++) {
+			Ring b = ring_objects[j];
+			float theta = b.orientation;
+			vec3 ring_pos = b.position;
+			float x1 = cos(theta) * (pos[0] - ring_pos[0]) + sin(theta) * (pos[1] - ring_pos[1]);
+			float x2 = -sin(theta) * (pos[0] - ring_pos[0]) + cos(theta) * (pos[1] - ring_pos[1]);
+			if (x1*x1+(ring_pos[2]-pos[2])* (ring_pos[2] - pos[2])<1.0f && vcl::abs(x2)<0.1f) return j;
 		}
 		return -1;
+	}
+}
+
+int hit_cercle() {
+	{
+		if(hit_ring() < 0) return -1;
+		return 1;
 	}
 }
 

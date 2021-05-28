@@ -115,7 +115,7 @@ mesh create_terrain(perlin_noise_parameters const& parameters1)
 
 mesh create_ocean(perlin_noise_parameters const& parameters) {
     timer.update();
-    const unsigned int N = 100;
+    const unsigned int N = taille_terrain;
 
     mesh terrain_ile; // temporary terrain storage (CPU only)
     terrain_ile.position.resize(N * N);
@@ -195,9 +195,11 @@ mesh create_wall() {
 vector<vec3> generate_positions_on_terrain( perlin_noise_parameters const& parameters) {
     std::vector<vec3> a;
     int N = nb_arbres;
+    int nb = 0;
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = 0;
+        nb = 0;
         while (!c) {
             b = evaluate_terrain(rand_interval()*0.7f+0.15f, rand_interval()*0.7f+0.15f, parameters);
             c = true;
@@ -206,7 +208,12 @@ vector<vec3> generate_positions_on_terrain( perlin_noise_parameters const& param
                     c = false;
                 }
             }
+            nb += 1;
+            if(nb > limite_essai)
+                break;
         }
+        if(nb > limite_essai)
+                break;
         a.push_back(b);
         
     }
@@ -219,22 +226,28 @@ vector<vec3> generate_positions_ile() {
     vec3 b;
     float FLOAT_MIN =-(float) taille_terrain/2+10.0f;
     float FLOAT_MAX = (float)taille_terrain / 2 - 10.0f;
-
+    int nb = 0;
     for (int i = 0; i < N; i++) {
         int c = false;
+        nb = 0;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0 };
             c = true;
-            std::cout << b<< "; " << a.size() << std::endl;
             for (size_t k = 0; k < a.size(); k++) {
                 if (std::abs(a[k][0] - b[0]) < 20 
                 && std::abs(a[k][1] - b[1]) < 20) {
                     c = false;
                 }
             }
+            nb += 1;
+            if(nb > limite_essai)
+                break;
         }
+        if(nb > limite_essai)
+                break;
         a.push_back(b);
     }
+    std::cout << a.size() << std::endl;
     std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
@@ -270,6 +283,7 @@ vector<float> generate_rotation(int N)
 vector<vec3> generate_positions_clouds() {
     std::vector<vec3> a;
     int N = nb_cloud;
+    int nb = 0;
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
@@ -277,6 +291,7 @@ vector<vec3> generate_positions_clouds() {
         float FLOAT_MAX = (float) taille_terrain / 2.0f;
         float HEIGHT_MAX = ceiling_height;
         float HEIGHT_MIN = 5.0f;
+        nb = 0;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) ,  HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN) };
             c = true;
@@ -285,49 +300,42 @@ vector<vec3> generate_positions_clouds() {
                     c = false;
                 }
             }
+            nb += 1;
+            if(nb > limite_essai)
+                break;
         }
+        if(nb > limite_essai)
+                break;
         a.push_back(b);
     }
     return a;
 }
 
-std::vector<vcl::vec3> generate_positions_ring()
+void generate_positions_ring()
 {
     int N = nb_ring;
-    std::vector<vec3> a;
-
     for (int i = 0; i < N; i++) {
         vec3 b;
-        int c = false;
-        float FLOAT_MIN = -(float)taille_terrain / 2.0f;
-        float FLOAT_MAX = (float)taille_terrain / 2.0f;
-        float HEIGHT_MAX = ceiling_height;
-        float HEIGHT_MIN = 0.2f;
-        while (!c) {
-            b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) ,  HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN) };
-            c = true;
-            for (size_t k = 0; k < a.size(); k++) {
-                if (a[k][0] - b[0] <5 && a[k][0] - b[0]>-5 && a[k][1] - b[1] <5 && a[k][1] - b[1]>-5) {
-                    c = false;
-                }
-            }
-        }
-        a.push_back(b);
+        bool c = false;
+        Ring::get_position(ring_objects, b, c);
+        if(!c)
+            return;
+        Ring::add_ring(ring_objects, b);
     }
-    //std::sort(a.begin(), a.end(), compare_vec);
-    return a;
     
 }
 
 vector<vec3> generate_positions_ships() {
     std::vector<vec3> a;
     int N = nb_ship;
+    int nb = 0;
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
         float FLOAT_MIN = -(float)taille_terrain / 2;
         float FLOAT_MAX = (float)taille_terrain / 2;
         float taille_ship = 8.0f;
+        nb = 0;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0.35f };
             c = true;
@@ -342,7 +350,12 @@ vector<vec3> generate_positions_ships() {
                     c = false;
                 }
             }
+            nb += 1;
+            if(nb > limite_essai)
+                break;
         }
+        if(nb > limite_essai)
+                break;
         a.push_back(b);
     }
     return a;
@@ -419,46 +432,48 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale)
 
 
 void generate_terrain() {
-    ring_position.clear();
-    ring_orientation.clear();
-    ring_position = generate_positions_ring();
-    ring_orientation = generate_rotation(nb_ring);
+    ring_objects.clear();
+    generate_positions_ring();
 
     ile_position.clear();
     ile_orientation.clear();
     ile_position = generate_positions_ile();
-    ile_orientation = generate_rotation(nb_iles);
+    ile_orientation = generate_rotation(ile_position.size());
 
     ship_position.clear();
     ship_orientation.clear();
     ship_position = generate_positions_ships();
-    ship_orientation = generate_rotation(nb_ship);
+    ship_orientation = generate_rotation(ship_position.size());
 
     cloud_position.clear();
     cloud_orientation.clear();
     cloud_position = generate_positions_clouds();
-    cloud_orientation = generate_rotation(nb_cloud);
+    cloud_orientation = generate_rotation(cloud_position.size());
 
-    wall.clear();
-    wall = mesh_drawable(create_wall());
-    image_raw const im3 = image_load_png("assets/rayure1.png");
-	// Send this image to the GPU, and get its identifier texture_image_id
-	GLuint const texture_image_id3 = opengl_texture_to_gpu(im3,
+    mesh tmp = create_wall();
+    wall.update_position(tmp.position);
+
+    ocean.clear();
+    ocean_m = create_ocean(parameters);
+	ocean = mesh_drawable(ocean_m);
+	//ocean.shading.color = { 0.0f, 0.0f, 1.0f };
+	image_raw const im4 = image_load_png("assets/ocean.png");
+	GLuint const texture_image_id4 = opengl_texture_to_gpu(im4,
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
-	wall.texture = texture_image_id3;
-	wall.shading.alpha = 0.5f;
+	ocean.texture = texture_image_id4;
 
     liste_iles.clear();
     liste_tree_position.clear();
     liste_noise_ile.clear();
-    for (int k = 0; k < nb_iles; k++) {
+    for (int k = 0; k < ile_position.size(); k++) {
         perlin_noise_parameters par2 = generate_alea_ile();
         liste_iles.push_back(ile_g(par2));
         liste_tree_position.push_back(generate_positions_on_terrain(par2));
         liste_noise_ile.push_back(par2);
     }
     ile_position_inf = generate_positions_ile_inf(10);
+
 }
 
 mesh_drawable ile_g(perlin_noise_parameters par2) {
@@ -508,11 +523,11 @@ vector<vec3> generate_positions_ile_inf(int N) {
     vec3 b;
     float FLOAT_MIN = -(float)taille_terrain + 10.0f;
     float FLOAT_MAX = (float)taille_terrain - 10.0f;
-
+    int nb = 0;
     for (int i = 0; i < N; i++) {
         int c = false;
-        int nb = 0;
-        while (!c && nb<400) {
+        nb = 0;
+        while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0 };
             c = true;
             //std::cout << b << "; " << a.size() << std::endl;
@@ -527,17 +542,13 @@ vector<vec3> generate_positions_ile_inf(int N) {
                 
             }
             nb++;
+            if(nb > limite_essai)
+                break;
         }
-        std::cout << "nb " << nb << std::endl;
-        if (nb < 400) {
-            a.push_back(b);
-        }
+        if(nb > limite_essai)
+                break;
+        a.push_back(b);
         
     }
-    std::cout << taille_terrain<< std::endl;
-    for (int k = 0; k < a.size(); k++){
-        std::cout << a[k] << std::endl;
-    }
-
     return a;
 }

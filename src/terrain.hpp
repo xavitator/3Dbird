@@ -2,6 +2,7 @@
 
 #include "vcl/vcl.hpp"
 #include "variable.hpp"
+#include "ring.hpp"
 #include <random>
 #include <iostream>
 #include <iomanip>
@@ -18,7 +19,7 @@ vcl::mesh create_ocean(perlin_noise_parameters const& parameters);
 std::vector<vcl::vec3> generate_positions_on_terrain(perlin_noise_parameters const& parameters);
 std::vector<vcl::vec3> generate_positions_ile();
 std::vector<vcl::vec3> generate_positions_clouds();
-std::vector<vcl::vec3> generate_positions_ring();
+void generate_positions_ring();
 std::vector<vcl::vec3> generate_positions_ships();
 perlin_noise_parameters generate_alea_ile();
 std::vector<float> generate_rotation(int N);

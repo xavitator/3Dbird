@@ -1,6 +1,9 @@
 #include "variable.hpp"
 
 timer_basic timer;
+timer_event_periodic period_1 = timer_event_periodic(1);
+timer_event_periodic period_10 = timer_event_periodic(10);
+
 
 user_interaction_parameters user;
 scene_environment scene;
@@ -40,8 +43,7 @@ std::vector<float> cloud_orientation;
 std::vector<vcl::vec3> ship_position;
 std::vector<float> ship_orientation;
 
-std::vector<vcl::vec3> ring_position;
-std::vector<float> ring_orientation;
+std::vector<Ring> ring_objects;
 
 std::vector<perlin_noise_parameters> liste_noise_ile;
 
@@ -53,10 +55,11 @@ int nb_ship = 20;
 float fact_rot_cam = 0.005f;
 float rot_facteur_bird = 0.05f;
 vec3 rho_theta_phi = {5.0, 1.0, 1.0};
-float initial_speed = 1.01f;
+float initial_speed = 1.05f;
 int ceiling_height = 11;
 int nb_ring = 100;
 float v_maree = 0.1f;
+int limite_essai = 10;
 int width = 1280, height = 1024;
 
 int compare_vec(vec3 vec_1, vec3 vec_2) {

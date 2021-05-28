@@ -28,6 +28,7 @@ void initialize_data();
 void display_scene();
 void display_interface();
 void restart_game();
+void update_from_timer();
 
 
 int main(int, char* argv[])
@@ -89,14 +90,38 @@ int main(int, char* argv[])
 		if(a >= 0 && a <= 6){
 			user.dead = true;
 		}
-		std::cout << "a " << a << std::endl;
-	}
+		if(! user.dead){
+			update_from_timer();
+			if(a == RING){
+					int ind = hit_ring();
+					Ring r = ring_objects[ind];
+					r.cross();
+					ring_objects.erase(ring_objects.begin() + ind);
+			}
+		}
+}
 
 	imgui_cleanup();
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
 	return 0;
+}
+
+void update_from_timer(){
+	period_1.update();
+	period_10.update();
+	if(period_1.event){
+		user.score += 1;
+	}
+	if(period_10.event){
+		vec3 tmp;
+		bool b;
+		Ring::get_position(ring_objects, tmp, b);
+		if(b){
+			Ring::add_ring(ring_objects, tmp);
+		}
+	}
 }
 
 void restart_game(){
@@ -146,6 +171,14 @@ void initialize_data()
 	cloud3 = mesh_drawable(mesh_load_file_obj("assets/Cloud_3.obj"));
 	cloud4 = mesh_drawable(mesh_load_file_obj("assets/Cloud_4.obj"));
 
+	wall = mesh_drawable(create_wall());
+	image_raw const im3 = image_load_png("assets/rayure1.png");
+	// Send this image to the GPU, and get its identifier texture_image_id
+	GLuint const texture_image_id3 = opengl_texture_to_gpu(im3,
+		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
+		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
+	wall.texture = texture_image_id3;
+	wall.shading.alpha = 0.5f;
 	
 	ship = mesh_drawable(mesh_load_file_obj("assets/ship.obj"));
 	ship.transform.scale = 0.023f;
@@ -155,15 +188,10 @@ void initialize_data()
 	ring.shading.color = { 1.0f,0,0 };
 	ring.transform.scale = 0.5f;
 
-	ocean_m = create_ocean(parameters);
-	ocean = mesh_drawable(ocean_m);
-	//ocean.shading.color = { 0.0f, 0.0f, 1.0f };
 	image_raw const im4 = image_load_png("assets/ocean.png");
 	GLuint const texture_image_id4 = opengl_texture_to_gpu(im4,
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
-
-	ocean.texture = texture_image_id4;
 
 	ocean_inf = mesh_drawable(create_ocean_infini());
 	ocean_inf.texture = texture_image_id4;
@@ -181,19 +209,22 @@ using draw_func = std::function<void(mesh_drawable const& drawable, scene_enviro
 void display_scene()
 {	
 	
+	std::cout << "aa" << std::endl;
+
 	update_ocean(ocean_m, ocean, parameters);
+    std::cout << "aa1" << std::endl;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
 		ocean.transform.translate = { 0,0,0 };
 		draw_element(ocean, scene);	
-		
-		for (int k = 0; k < nb_iles; k++) {
+		std::cout << liste_iles.size() << std::endl;
+		for (int k = 0; k < liste_iles.size(); k++) {
 			liste_iles[k].transform.translate = ile_position[k];
 			//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
 			draw_element(liste_iles[k], scene);
 			int j = 0;
-			for (int i = 0; i < nb_arbres; i++) {
+			for (int i = 0; i < liste_tree_position[k].size(); i++) {
 				if (j < 2) {
 					tree.transform.translate = liste_tree_position[k][i];
 					tree.transform.translate += ile_position[k];
@@ -211,7 +242,7 @@ void display_scene()
 				}
 			}
 		}
-		for (int k = 0; k< nb_ship; k++) {
+		for (int k = 0; k< ship_position.size(); k++) {
 			ship.transform.translate = ship_position[k];
 			ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters) *0.8f};
 			ship.transform.rotate = rotation({ { cos(ship_orientation[k]),0,sin(ship_orientation[k]) }, { sin(ship_orientation[k]),0,-cos(ship_orientation[k]) },{0,1,0} });
@@ -249,14 +280,16 @@ void display_scene()
 				//j=0;
 			}
 		}
-		for (int i = 0; i < ring_position.size(); i++) {
-			ring.transform.translate = ring_position[i];
-			ring.transform.rotate = rotation({ 0,0,1 }, ring_orientation[i]);
+		for (int i = 0; i < ring_objects.size(); i++) {
+			ring.transform.translate = ring_objects[i].position;
+			ring.shading.color = ring_objects[i].color;
+			ring.transform.rotate = rotation({ 0,0,1 }, ring_objects[i].orientation);
 			draw_element(ring, scene);
 		}
 		
 		
 	};
+    std::cout << "ee" << std::endl;
 
 	// First pass: draw all shapes that cast shadows
 	{
@@ -269,6 +302,7 @@ void display_scene()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); opengl_check;
 		
 	}
+    std::cout << "ee1" << std::endl;
 
 	// Second pass: Draw all shapes that receives shadows
 	{
@@ -278,14 +312,17 @@ void display_scene()
 		draw_all(draw_with_shadow);
 
 	}
+    std::cout << "ee2" << std::endl;
 	for (int i = 0; i < ile_position_inf.size(); i++) {
 		liste_iles[0].transform.translate = ile_position_inf[i];
 		draw(liste_iles[0], scene);
 	}
+    std::cout << "ee3" << std::endl;
 	ship.transform.translate = { 0,0,0 };
 	draw(ship, scene);
 	ocean_inf.transform.translate = { 0,0,0 };
 	draw(ocean_inf, scene);
+    std::cout << "ee4" << std::endl;
 	glDepthMask(false);
 	wall.transform.rotate = rotation({ 0,0,1 }, 0);
 	wall.transform.translate = { 0,0,0 };
@@ -300,17 +337,20 @@ void display_scene()
 	wall.transform.translate = { taille_terrain,0,0 };
 	draw(wall, scene);
 
+    std::cout << "ee5" << std::endl;
 	glDepthMask(true);
 
 	if(! user.dead){
 		move_bird();
 		move_camera_center();
 	}
+    std::cout << "ee6" << std::endl;
 }
-
+int n_taille_terrain = taille_terrain;
 void display_interface()
 {
 	//ImGui::Checkbox("Frame", &user.gui.display_frame);
+	
 	ImGui::Text("Score : %ld", user.score);
 	ImGui::Separator();
 	if (ImGui::CollapsingHeader("Paramètres"))
@@ -321,19 +361,19 @@ void display_interface()
     }
 	if(user.dead && ImGui::CollapsingHeader("Jeu")){
 		ImGui::Text("Vous pouvez modifier les paramètres d'initialisation :");
-        ImGui::SliderInt("Terrain", &taille_terrain, 20, 500);
+        ImGui::SliderInt("Terrain", &n_taille_terrain, 20, 150);
         ImGui::SliderInt("Îles", &nb_iles, 0, 100);
         ImGui::SliderInt("Arbres", &nb_arbres, 0, 100);
         ImGui::SliderInt("Nuages", &nb_cloud, 0, 100);
         ImGui::SliderInt("Bâteaux", &nb_ship, 0, 100);
-        ImGui::SliderInt("Anneaux", &nb_ring, 0, 100);	
-        ImGui::SliderFloat("Vitesse initiale", &initial_speed, 1.01f, 5.0f);
+        ImGui::SliderInt("Anneaux", &nb_ring, 0, 300);	
+        ImGui::SliderFloat("Vitesse initiale", &initial_speed, 1.01f, 1.2f);
         ImGui::SliderInt("Hauteur de plafond", &ceiling_height, 5, taille_terrain);
 	}
 	if(user.dead){
 		ImGui::Separator();
 		if(ImGui::SmallButton("Genérer")){
-			generate_terrain();
+			taille_terrain = n_taille_terrain;
 			restart_game();
 				
 		}

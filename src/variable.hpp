@@ -3,6 +3,7 @@
 #include <iostream>
 #include <list>
 #include "vcl/vcl.hpp"
+#include "ring.hpp"
 
 using namespace vcl;
 
@@ -79,6 +80,8 @@ extern std::vector<vcl::vec3> tree_position;
 extern perlin_noise_parameters parameters;
 
 extern timer_basic timer;
+extern timer_event_periodic period_1;
+extern timer_event_periodic period_10;
 
 extern user_interaction_parameters user;
 extern scene_environment scene;
@@ -117,8 +120,7 @@ extern std::vector<float> cloud_orientation;
 extern std::vector<vcl::vec3> ship_position;
 extern std::vector<float> ship_orientation;
 
-extern std::vector<vcl::vec3> ring_position;
-extern std::vector<float> ring_orientation;
+extern std::vector<Ring> ring_objects;
 
 extern std::vector<perlin_noise_parameters> liste_noise_ile;
 
@@ -134,6 +136,7 @@ extern float rot_facteur_bird;
 extern vec3 rho_theta_phi;
 extern float initial_speed;
 extern int ceiling_height;
+extern int limite_essai;
 extern int width;
 extern int height;
 
