@@ -138,3 +138,7 @@ extern int width;
 extern int height;
 
 int compare_vec(vec3 vec_1, vec3 vec_2);
+
+extern float omega;
+extern float theta;
+extern float vitesse;

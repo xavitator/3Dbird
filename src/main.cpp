@@ -89,7 +89,7 @@ int main(int, char* argv[])
 		if(a >= 0 && a <= 6){
 			user.dead = true;
 		}
-		std::cout << "a " << a << std::endl;
+		//std::cout << "a " << a << std::endl;
 	}
 
 	imgui_cleanup();
@@ -99,17 +99,20 @@ int main(int, char* argv[])
 	return 0;
 }
 
-void restart_game(){
+void restart_game() {
 	generate_terrain();
 	user.dead = false;
-	pos_without_oscill = {0,0,5};
+	pos_without_oscill = { 0,0,5 };
 	hierarchy_bird["body"].transform.translate = pos_without_oscill;
-	orientation_bird = {0,1,0};
+	orientation_bird = { 0,1,0 };
 	hierarchy_bird["body"].transform.rotate = rotation();
-	rho_theta_phi = {5.0, 1.0, 1.0};
+	rho_theta_phi = { 5.0, 1.0, 1.0 };
 	int choc;
-	while( (choc = hit_ois()) >= 0 && choc <= 6 )
+	while ((choc = hit_ois()) >= 0 && choc <= 6)
 		generate_terrain();
+	omega = 00.0f;
+	theta = 0.0f;
+	vitesse = 0.0f;
 }
 
 void initialize_data()
@@ -304,6 +307,17 @@ void display_scene()
 
 	if(! user.dead){
 		move_bird();
+		move_camera_center();
+	}
+	else {
+		fall();
+		draw(hierarchy_bird, scene);
+		float rho = rho_theta_phi[0];
+		float theta = pi / 4;
+		float phi = pi / 4;
+		vec3 pos_bird = get_pos_bird();
+		vec3 pos_centered = { rho * std::sin(theta) * std::cos(phi), rho * std::sin(theta) * std::sin(phi), rho * std::cos(theta) };
+		scene.camera.look_at(pos_centered + pos_bird, pos_bird, { 0,0,rho });
 		move_camera_center();
 	}
 }
