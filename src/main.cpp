@@ -380,6 +380,7 @@ void display_interface()
 		ImGui::BulletText(" cercle bleu : rapporte 10 points mais augmente le facteur de vitesse\n");
 		ImGui::BulletText(" cercle vert : rapporte 5 points et diminue le facteur de vitesse\n");
 		ImGui::BulletText(" cercle or : rapporte 100 points\n");
+		ImGui::Text("Entre deux parties, vous pourrez changer les paramètres de génération de la carte.\n");
 	}
 
 	if (ImGui::CollapsingHeader("Paramètres"))
