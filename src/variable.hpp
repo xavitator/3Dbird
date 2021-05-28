@@ -38,6 +38,8 @@ struct user_interaction_parameters {
 	bool cursor_on_gui;
     bool display_frame = true;
 	keyboard_state_parameters keyboard_state;
+	uint64_t score = 0;
+	bool dead = false;
 	float speed = 0.001f;
 };
 
@@ -131,7 +133,7 @@ extern float fact_rot_cam;
 extern float rot_facteur_bird;
 extern vec3 rho_theta_phi;
 extern float initial_speed;
-extern float ceiling_height;
+extern int ceiling_height;
 extern int width;
 extern int height;
 

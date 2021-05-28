@@ -54,7 +54,7 @@ float fact_rot_cam = 0.005f;
 float rot_facteur_bird = 0.05f;
 vec3 rho_theta_phi = {5.0, 1.0, 1.0};
 float initial_speed = 1.01f;
-float ceiling_height = 11;
+int ceiling_height = 11;
 int nb_ring = 100;
 float v_maree = 0.1f;
 int width = 1280, height = 1024;

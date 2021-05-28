@@ -181,8 +181,8 @@ mesh create_wall() {
     vec3 p = { t ,t,0 };
     terrain_ile.position[0] = p;
     terrain_ile.position[1] = { -t,t,0 };
-    terrain_ile.position[2] = { t,t,t };
-    terrain_ile.position[3] = { -t,t,t };
+    terrain.position[2] = { t,t, ceiling_height };
+    terrain.position[3] = { -t,t, ceiling_height };
     const uint3 triangle_1 = { 0,   1 , 2 };
     const uint3 triangle_2 = { 1,   2 , 3 };
     terrain_ile.connectivity.push_back(triangle_1);
@@ -276,9 +276,9 @@ vector<vec3> generate_positions_clouds() {
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
-        float FLOAT_MIN = -(float) taille_terrain/2;
-        float FLOAT_MAX = (float) taille_terrain / 2;
-        float HEIGHT_MAX = 10.0f;
+        float FLOAT_MIN = -(float) taille_terrain/2.0f;
+        float FLOAT_MAX = (float) taille_terrain / 2.0f;
+        float HEIGHT_MAX = ceiling_height;
         float HEIGHT_MIN = 5.0f;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) ,  HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN) };
@@ -302,9 +302,9 @@ std::vector<vcl::vec3> generate_positions_ring()
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
-        float FLOAT_MIN = -(float)taille_terrain / 2;
-        float FLOAT_MAX = (float)taille_terrain / 2;
-        float HEIGHT_MAX = 10.0f;
+        float FLOAT_MIN = -(float)taille_terrain / 2.0f;
+        float FLOAT_MAX = (float)taille_terrain / 2.0f;
+        float HEIGHT_MAX = ceiling_height;
         float HEIGHT_MIN = 0.2f;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) ,  HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN) };
@@ -334,7 +334,6 @@ vector<vec3> generate_positions_ships() {
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0.35f };
             c = true;
-            std::cout << "aaaaa" << std::endl;
             for (size_t k = 0; k < a.size(); k++) {
                 if (a[k][0] - b[0] <taille_ship && a[k][0] - b[0]>-taille_ship && a[k][1] - b[1] <taille_ship && a[k][1] - b[1]>-taille_ship) {
                     c = false;
@@ -423,14 +422,35 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale)
 
 
 void generate_terrain() {
+    ring_position.clear();
+    ring_orientation.clear();
+    ring_position = generate_positions_ring();
     ring_orientation = generate_rotation(nb_ring);
+
+    ile_position.clear();
+    ile_orientation.clear();
     ile_position = generate_positions_ile();
     ile_orientation = generate_rotation(nb_iles);
-    ring_position = generate_positions_ring();
+
+    ship_position.clear();
+    ship_orientation.clear();
     ship_position = generate_positions_ships();
     ship_orientation = generate_rotation(nb_ship);
+
+    cloud_position.clear();
+    cloud_orientation.clear();
     cloud_position = generate_positions_clouds();
     cloud_orientation = generate_rotation(nb_cloud);
+
+    ring_position.clear();
+    ring_position.clear();
+
+    wall.clear();
+    wall = mesh_drawable(create_wall());
+
+    liste_iles.clear();
+    liste_tree_position.clear();
+    liste_noise_ile.clear();
     for (int k = 0; k < nb_iles; k++) {
         perlin_noise_parameters par2 = generate_alea_ile();
         liste_iles.push_back(ile_g(par2));

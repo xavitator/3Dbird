@@ -27,6 +27,7 @@ void opengl_uniform(GLuint shader, scene_environment const& current_scene);
 void initialize_data();
 void display_scene();
 void display_interface();
+void restart_game();
 
 
 int main(int, char* argv[])
@@ -53,38 +54,42 @@ int main(int, char* argv[])
 	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window))
 	{
-		generate_terrain();
-		hierarchy_bird["body"].transform.translate = { 0,0,5 };
-		pos_without_oscill = hierarchy_bird["body"].transform.translate;
-		int b = -1;
-		while ((b == -1 ||b == 7 || true) && !glfwWindowShouldClose(window)) {
-			// scene.light = scene.camera.position();
-			user.fps_record.update();
+		// scene.light = scene.camera.position();
+		user.fps_record.update();
 
-			glClearColor(189 / 255.0f, 217 / 255.0f, 242 / 255.0f, 0.95f);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glClear(GL_DEPTH_BUFFER_BIT);
-			imgui_create_frame();
-			if (user.fps_record.event) {
-				std::string const title = "VCL Display - " + str(user.fps_record.fps) + " fps";
-				glfwSetWindowTitle(window, title.c_str());
-			}
-
-			ImGui::Begin("GUI", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-			//user.cursor_on_gui = ImGui::GetIO().WantCaptureMouse;
-
-			if (user.gui.display_frame) draw(user.global_frame, scene);
-
-			display_interface();
-			display_scene();
-
-			ImGui::End();
-			imgui_render_frame(window);
-			glfwSwapBuffers(window);
-			glfwPollEvents();
-			b = hit_ois();
-			std::cout << b << std::endl;
+		glClearColor(189 / 255.0f, 217 / 255.0f, 242 / 255.0f, 0.95f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		imgui_create_frame();
+		if (user.fps_record.event) {
+			std::string const title = "VCL Display - " + str(user.fps_record.fps) + " fps";
+			glfwSetWindowTitle(window, title.c_str());
 		}
+
+		ImGui::Begin("Inteface de jeu",NULL,ImGuiWindowFlags_AlwaysAutoResize);
+		// //user.cursor_on_gui = ImGui::GetIO().WantCaptureMouse;
+
+		// if(user.gui.display_frame) draw(user.global_frame, scene);
+
+		display_interface();
+		display_scene();
+
+		ImGui::End();
+		imgui_render_frame(window);
+
+		// ImGui::Begin("Interface de jeu",NULL,ImGuiWindowFlags_AlwaysAutoResize);
+		// bool e = true;
+		// ImGui::ShowDemoWindow(&e);
+		// ImGui::End();
+		// imgui_render_frame(window);
+		
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+		int a = hit_ois();
+		if(a >= 0 && a <= 6){
+			user.dead = true;
+		}
+		std::cout << "a " << a << std::endl;
 	}
 
 	imgui_cleanup();
@@ -94,7 +99,18 @@ int main(int, char* argv[])
 	return 0;
 }
 
-
+void restart_game(){
+	generate_terrain();
+	user.dead = false;
+	pos_without_oscill = {0,0,5};
+	hierarchy_bird["body"].transform.translate = pos_without_oscill;
+	orientation_bird = {0,1,0};
+	hierarchy_bird["body"].transform.rotate = rotation();
+	rho_theta_phi = {5.0, 1.0, 1.0};
+	int choc;
+	while( (choc = hit_ois()) >= 0 && choc <= 6 )
+		generate_terrain();
+}
 
 void initialize_data()
 {
@@ -165,7 +181,7 @@ void initialize_data()
 
 	create_bird();
 
-	generate_terrain();
+	restart_game();
 
 	
 
@@ -298,17 +314,42 @@ void display_scene()
 
 	glDepthMask(true);
 
-	
-	move_bird();
-	move_camera_center();
+	if(! user.dead){
+		move_bird();
+		move_camera_center();
+	}
 }
-
 
 void display_interface()
 {
-	ImGui::Checkbox("Frame", &user.gui.display_frame);
-
-	
+	//ImGui::Checkbox("Frame", &user.gui.display_frame);
+	ImGui::Text("Score : %ld", user.score);
+	ImGui::Separator();
+	if (ImGui::CollapsingHeader("Paramètres"))
+    {
+		ImGui::Text("Vous pouvez modifier de jeu :");
+        ImGui::SliderFloat("Sensibilité caméra", &fact_rot_cam, 0.001f, 0.01f);
+        ImGui::SliderFloat("Sensibilité oiseau", &rot_facteur_bird, 0.01f, 0.1f);
+    }
+	if(user.dead && ImGui::CollapsingHeader("Jeu")){
+		ImGui::Text("Vous pouvez modifier les paramètres d'initialisation :");
+        ImGui::SliderInt("Terrain", &taille_terrain, 20, 500);
+        ImGui::SliderInt("Îles", &nb_iles, 0, 100);
+        ImGui::SliderInt("Arbres", &nb_arbres, 0, 100);
+        ImGui::SliderInt("Nuages", &nb_cloud, 0, 100);
+        ImGui::SliderInt("Bâteaux", &nb_ship, 0, 100);
+        ImGui::SliderInt("Anneaux", &nb_ring, 0, 100);	
+        ImGui::SliderFloat("Vitesse initiale", &initial_speed, 1.01f, 5.0f);
+        ImGui::SliderInt("Hauteur de plafond", &ceiling_height, 5, taille_terrain);
+	}
+	if(user.dead){
+		ImGui::Separator();
+		if(ImGui::SmallButton("Genérer")){
+			generate_terrain();
+			restart_game();
+				
+		}
+	}
 }
 
 void window_size_callback(GLFWwindow* , int n_width, int n_height)
@@ -327,7 +368,7 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 	vec2 const& p0 = user.mouse_prev;
 	glfw_state state = glfw_current_state(window);
 
-	if(state.key_ctrl){
+	if(state.key_ctrl || user.dead){
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		// auto& camera = scene.camera;
 		// vec2 const  p2 = glfw_get_mouse_cursor(window, xpos, ypos);
@@ -340,7 +381,7 @@ void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
 	}
 	else
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	if(! state.key_ctrl){
+	if(! state.key_ctrl && ! user.dead){
 		move_camera_rotation(p0, p1);
 	}
 	user.mouse_prev = p1;
