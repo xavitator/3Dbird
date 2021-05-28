@@ -95,6 +95,7 @@ extern mesh_drawable cloud3;
 extern mesh_drawable cloud4;
 extern mesh_drawable ship;
 extern mesh_drawable ring;
+extern mesh_drawable ocean_inf;
 
 extern hierarchy_mesh_drawable hierarchy_bird;
 extern vec3 orientation_bird;
@@ -106,6 +107,7 @@ extern mesh_drawable billboard_grass;
 extern mesh_drawable billboard_bird;
 extern std::vector<mesh_drawable> liste_iles;
 extern std::vector<vcl::vec3> ile_position;
+extern std::vector<vcl::vec3> ile_position_inf;
 extern std::vector<std::vector<vcl::vec3>> liste_tree_position;
 extern std::vector<float> ile_orientation;
 extern std::vector<vcl::vec3> cloud_position;

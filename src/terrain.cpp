@@ -54,15 +54,15 @@ vec3 evaluate_terrain(float u, float v, perlin_noise_parameters const& parameter
     return {x,y,z};
 }
 
-mesh create_terrain(perlin_noise_parameters const& parameters)
+mesh create_terrain(perlin_noise_parameters const& parameters1)
 {
     // Number of samples of the terrain is N x N
     const unsigned int N = 100;
 
-    mesh terrain; // temporary terrain storage (CPU only)
-    terrain.position.resize(N * N);
-    terrain.uv.resize(N * N);
-    terrain.color.resize(N * N);
+    mesh terrain_ile; // temporary terrain storage (CPU only)
+    terrain_ile.position.resize(N * N);
+    terrain_ile.uv.resize(N * N);
+    terrain_ile.color.resize(N * N);
 
     // Fill terrain geometry
     for(unsigned int ku=0; ku<N; ++ku)
@@ -73,22 +73,22 @@ mesh create_terrain(perlin_noise_parameters const& parameters)
             const float u = ku/(N-1.0f);
             const float v = kv/(N-1.0f);
 
-            float const noise = noise_perlin({ u, v }, parameters.octave, parameters.persistency, parameters.frequency_gain);
+            float const noise = noise_perlin({ u, v }, parameters1.octave, parameters1.persistency, parameters1.frequency_gain);
 
             // Compute the local surface function
-            vec3 const p = evaluate_terrain(u,v, parameters);
+            vec3 const p = evaluate_terrain(u,v, parameters1);
 
             // Store vertex coordinates
-            terrain.position[kv + N * ku] = p;
-            terrain.uv[kv + N * ku] = { u * N / 5,v * N / 5 };
+            terrain_ile.position[kv + N * ku] = p;
+            terrain_ile.uv[kv + N * ku] = { u * N / 5,v * N / 5 };
             if (((kv - 50) * (kv - 50) + (ku - 50) * (ku - 50) )*(1 + 0.125f * sin(kv * 50 + ku * 50)) > 1500) {
                 
-                terrain.color[kv + N * ku] = vec3{ 1.0f,1.0f,1.00f };
-                terrain.uv[kv + N * ku] = {((float) u * N / 5 - floor( u * N / 5))/2.01f,v * N / 5 };
+                terrain_ile.color[kv + N * ku] = vec3{ 1.0f,1.0f,1.00f };
+                terrain_ile.uv[kv + N * ku] = {((float) u * N / 5 - floor( u * N / 5))/2.01f,v * N / 5 };
             }
             else {
-                terrain.color[kv + N * ku] = vec3{ 1.0f,1.0f,1.0f };
-                terrain.uv[kv + N * ku] = { ((float)u * N / 5 - floor(u * N / 5)) / 2.01f+0.501,v * N / 5 };
+                terrain_ile.color[kv + N * ku] = vec3{ 1.0f,1.0f,1.0f };
+                terrain_ile.uv[kv + N * ku] = { ((float)u * N / 5 - floor(u * N / 5)) / 2.01f+0.501,v * N / 5 };
             }
         }
     }
@@ -104,22 +104,22 @@ mesh create_terrain(perlin_noise_parameters const& parameters)
             const uint3 triangle_1 = {idx, idx+1+N, idx+1};
             const uint3 triangle_2 = {idx, idx+N, idx+1+N};
 
-            terrain.connectivity.push_back(triangle_1);
-            terrain.connectivity.push_back(triangle_2);
+            terrain_ile.connectivity.push_back(triangle_1);
+            terrain_ile.connectivity.push_back(triangle_2);
         }
     }
 
-	terrain.fill_empty_field(); // need to call this function to fill the other buffer with default values (normal, color, etc)
-    return terrain;
+	terrain_ile.fill_empty_field(); // need to call this function to fill the other buffer with default values (normal, color, etc)
+    return terrain_ile;
 }
 
-mesh create_ocean(perlin_noise_parameters const& parameters, int taille) {
+mesh create_ocean(perlin_noise_parameters const& parameters) {
     timer.update();
     const unsigned int N = 100;
 
-    mesh terrain; // temporary terrain storage (CPU only)
-    terrain.position.resize(N * N);
-    terrain.uv.resize(N * N);
+    mesh terrain_ile; // temporary terrain storage (CPU only)
+    terrain_ile.position.resize(N * N);
+    terrain_ile.uv.resize(N * N);
     
     // Fill terrain geometry
     for (unsigned int ku = 0; ku < N; ++ku)
@@ -134,8 +134,8 @@ mesh create_ocean(perlin_noise_parameters const& parameters, int taille) {
 
             // Compute the local surface function
         
-            float x = taille * (u - 0.5f);
-            float y = taille * (v - 0.5f);
+            float x = taille_terrain* (u - 0.5f);
+            float y = taille_terrain* (v - 0.5f);
             
             
 
@@ -144,8 +144,8 @@ mesh create_ocean(perlin_noise_parameters const& parameters, int taille) {
             // Store vertex coordinates
 
             // Store vertex coordinates
-            terrain.position[kv + N * ku] = p;
-            terrain.uv[kv + N * ku] = { u * N / 5,v * N / 5 };
+            terrain_ile.position[kv + N * ku] = p;
+            terrain_ile.uv[kv + N * ku] = { u * N / 5,v * N / 5 };
         }
     }
 
@@ -160,40 +160,44 @@ mesh create_ocean(perlin_noise_parameters const& parameters, int taille) {
             const uint3 triangle_1 = { idx, idx + 1 + N, idx + 1 };
             const uint3 triangle_2 = { idx, idx + N, idx + 1 + N };
 
-            terrain.connectivity.push_back(triangle_1);
-            terrain.connectivity.push_back(triangle_2);
+            terrain_ile.connectivity.push_back(triangle_1);
+            terrain_ile.connectivity.push_back(triangle_2);
         }
     }
 
-    terrain.fill_empty_field(); // need to call this function to fill the other buffer with default values (normal, color, etc)
-    return terrain;
+    terrain_ile.fill_empty_field(); // need to call this function to fill the other buffer with default values (normal, color, etc)
+    return terrain_ile;
 }
 
-mesh create_wall(int taille) {
-    mesh terrain; // temporary terrain storage (CPU only)
-    terrain.position.resize(2 * 2);
-    terrain.uv.resize(2 * 2);
-    float t = (float)taille / 2;
-    vec3 p = {t ,t,0 };
-    terrain.position[0] = p;
-    terrain.position[1] = { -t,t,0 };
-    terrain.position[2] = { t,t,t };
-    terrain.position[3] = { -t,t,t };
+mesh create_wall() {
+   
+
+    const unsigned int N = 100;
+
+    mesh terrain_ile; // temporary terrain storage (CPU only)
+    terrain_ile.position.resize(2 * 2);
+    terrain_ile.uv.resize(2 * 2);
+    float t = (float)taille_terrain/ 2;
+    vec3 p = { t ,t,0 };
+    terrain_ile.position[0] = p;
+    terrain_ile.position[1] = { -t,t,0 };
+    terrain_ile.position[2] = { t,t,t };
+    terrain_ile.position[3] = { -t,t,t };
     const uint3 triangle_1 = { 0,   1 , 2 };
     const uint3 triangle_2 = { 1,   2 , 3 };
-    terrain.connectivity.push_back(triangle_1);
-    terrain.connectivity.push_back(triangle_2);
-    terrain.fill_empty_field();
-    terrain.uv[0] = { 1.0f,0.0f };
-    terrain.uv[1] = { 2.0f,1.0f };
-    terrain.uv[2] = { 0.0f,1.0f };
-    terrain.uv[3] = { 1.0f,2.0f };
-    return terrain;
+    terrain_ile.connectivity.push_back(triangle_1);
+    terrain_ile.connectivity.push_back(triangle_2);
+    terrain_ile.fill_empty_field();
+    terrain_ile.uv[0] = { 1.0f,0.0f };
+    terrain_ile.uv[1] = { 2.0f,1.0f };
+    terrain_ile.uv[2] = { 0.0f,1.0f };
+    terrain_ile.uv[3] = { 1.0f,2.0f };
+    return terrain_ile;
 }
 
-vector<vec3> generate_positions_on_terrain(int N, perlin_noise_parameters const& parameters) {
+vector<vec3> generate_positions_on_terrain( perlin_noise_parameters const& parameters) {
     std::vector<vec3> a;
-    
+    int N = nb_arbres;
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = 0;
@@ -212,12 +216,12 @@ vector<vec3> generate_positions_on_terrain(int N, perlin_noise_parameters const&
     return a;
 }
 
-vector<vec3> generate_positions_ile(int N, int taille) {
+vector<vec3> generate_positions_ile() {
     std::vector<vec3> a;
-
+    int N = nb_iles;
     vec3 b;
-    float FLOAT_MIN =-(float) taille/2+10.0f;
-    float FLOAT_MAX = (float)taille / 2 - 10.0f;
+    float FLOAT_MIN =-(float) taille_terrain/2+10.0f;
+    float FLOAT_MAX = (float)taille_terrain / 2 - 10.0f;
 
     for (int i = 0; i < N; i++) {
         int c = false;
@@ -266,14 +270,14 @@ vector<float> generate_rotation(int N)
 }
 
 
-vector<vec3> generate_positions_clouds(int N, int taille) {
+vector<vec3> generate_positions_clouds() {
     std::vector<vec3> a;
-
+    int N = nb_cloud;
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
-        float FLOAT_MIN = -(float) taille/2;
-        float FLOAT_MAX = (float) taille / 2;
+        float FLOAT_MIN = -(float) taille_terrain/2;
+        float FLOAT_MAX = (float) taille_terrain / 2;
         float HEIGHT_MAX = 10.0f;
         float HEIGHT_MIN = 5.0f;
         while (!c) {
@@ -290,15 +294,16 @@ vector<vec3> generate_positions_clouds(int N, int taille) {
     return a;
 }
 
-std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
+std::vector<vcl::vec3> generate_positions_ring()
 {
+    int N = nb_ring;
     std::vector<vec3> a;
 
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
-        float FLOAT_MIN = -(float)taille / 2;
-        float FLOAT_MAX = (float)taille / 2;
+        float FLOAT_MIN = -(float)taille_terrain / 2;
+        float FLOAT_MAX = (float)taille_terrain / 2;
         float HEIGHT_MAX = 10.0f;
         float HEIGHT_MIN = 0.2f;
         while (!c) {
@@ -317,14 +322,14 @@ std::vector<vcl::vec3> generate_positions_ring(int N, int taille)
     
 }
 
-vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_ile) {
+vector<vec3> generate_positions_ships() {
     std::vector<vec3> a;
-
+    int N = nb_ship;
     for (int i = 0; i < N; i++) {
         vec3 b;
         int c = false;
-        float FLOAT_MIN = -(float)taille / 2;
-        float FLOAT_MAX = (float)taille / 2;
+        float FLOAT_MIN = -(float)taille_terrain / 2;
+        float FLOAT_MAX = (float)taille_terrain / 2;
         float taille_ship = 8.0f;
         while (!c) {
             b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0.35f };
@@ -335,9 +340,9 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
                     c = false;
                 }
             }
-            for (size_t k = 0; k < position_ile.size(); k++) {
-                std::cout << std::abs(position_ile[k][0] - b[0]) << std::endl;
-                if (std::abs(position_ile[k][0] - b[0]) < 15 && std::abs(position_ile[k][1] - b[1]) <15 ) {
+            for (size_t k = 0; k < ile_position.size(); k++) {
+                std::cout << std::abs(ile_position[k][0] - b[0]) << std::endl;
+                if (std::abs(ile_position[k][0] - b[0]) < 15 && std::abs(ile_position[k][1] - b[1]) <15 ) {
                     c = false;
                 }
             }
@@ -348,12 +353,12 @@ vector<vec3> generate_positions_ships(int N, int taille, vector<vec3> position_i
 }
 
 
-void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters, float v_maree)
+void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_parameters const& parameters)
 {
     timer.update();
 
     // Number of samples in each direction (assuming a square grid)
-    int const N = std::sqrt(ocean.position.size());
+    int const N = taille_terrain;
 
     // Recompute the new vertices
     for (int ku = 0; ku < N; ++ku) {
@@ -369,13 +374,13 @@ void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_paramet
             
 
             // use the noise as height value
-            ocean.position[idx].z = ocean_height(ku, kv, N, parameters, v_maree);
+            ocean.position[idx].z = ocean_height(ku, kv, N, parameters);
 
     
             // use also the noise as color value
             //ocean.color[idx] = 1-ocean_height(ku, kv, N, parameters) * vec3(0, 0, 0.5f) + ocean_height(ku, kv, N, parameters) * vec3(1, 1, 1)*100;
             //ocean.color[idx] = (1 - ocean_height(ku*20+ (float)(rand())/ 32767.0f*5, kv*20+(float)(rand()) / 32767.0f*5 , N, parameters)*0.3f) * vec3(0, 0, 1.0f)+ ocean_height(ku*20+(float)(rand()) / 32767.0f * 5, kv*20+ (float)(rand()) / 32767.0f * 5, N, parameters) * vec3(1, 1, 1) *0.3f;
-            ocean.color[idx] = vec3(0.75f, 0.75f, 0.75f) +0.7f* ( ocean_height(ku, kv, N, parameters, 0.1f) * vec3(1, 1, 1));
+            ocean.color[idx] = vec3(0.75f, 0.75f, 0.75f) +0.7f* ( ocean_height(ku, kv, N, parameters) * vec3(1, 1, 1));
             
         }
     }
@@ -390,7 +395,7 @@ void update_ocean(mesh& ocean, mesh_drawable& ocean_visual, perlin_noise_paramet
 
 }
 
-float ocean_height(float a, float b, int N, perlin_noise_parameters const& parameters, float v_maree) {
+float ocean_height(float a, float b, int N, perlin_noise_parameters const& parameters) {
     const float u = a / (N - 1.0f);
     const float v = b / (N - 1.0f);
 
@@ -403,14 +408,14 @@ float ocean_height(float a, float b, int N, perlin_noise_parameters const& param
     return std::max(0.01f, ((noise-1)*0.1f+0.08f- std::min(parameters.persistency + timer.t * 0.01f, 0.7f)*0.08f)*10);
 }
 
-vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
+vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale)
 {
-    float v =1.0f;
+    float v =0.2f;
     float dt = 0.1f;
     float a = ((float) v *(float) dt + (float) position_initiale[0]) ;
-    while (a>taille/2)
+    while (a>taille_terrain/2)
     {
-        a = a - taille;
+        a = a - taille_terrain;
     }
     position_initiale[0] = a;
     return position_initiale;
@@ -419,19 +424,20 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale, int taille)
 
 void generate_terrain() {
     ring_orientation = generate_rotation(nb_ring);
-    ile_position = generate_positions_ile(nb_iles, taille_terrain);
+    ile_position = generate_positions_ile();
     ile_orientation = generate_rotation(nb_iles);
-    ring_position = generate_positions_ring(nb_ring, taille_terrain);
-    ship_position = generate_positions_ships(nb_ship, taille_terrain, ile_position);
+    ring_position = generate_positions_ring();
+    ship_position = generate_positions_ships();
     ship_orientation = generate_rotation(nb_ship);
-    cloud_position = generate_positions_clouds(nb_cloud, taille_terrain);
+    cloud_position = generate_positions_clouds();
     cloud_orientation = generate_rotation(nb_cloud);
     for (int k = 0; k < nb_iles; k++) {
         perlin_noise_parameters par2 = generate_alea_ile();
         liste_iles.push_back(ile_g(par2));
-        liste_tree_position.push_back(generate_positions_on_terrain(nb_arbres, par2));
+        liste_tree_position.push_back(generate_positions_on_terrain(par2));
         liste_noise_ile.push_back(par2);
     }
+    ile_position_inf = generate_positions_ile_inf(10);
 }
 
 mesh_drawable ile_g(perlin_noise_parameters par2) {
@@ -450,4 +456,67 @@ mesh_drawable ile_g(perlin_noise_parameters par2) {
 	terrain_visual1.texture = texture_image_id2;
 
 	return terrain_visual1;
+}
+
+
+mesh create_ocean_infini() {
+    mesh terrain_ile; // temporary terrain_ile storage (CPU only)
+    terrain_ile.position.resize(2 * 2);
+    terrain_ile.uv.resize(2 * 2);
+    float t = (float)taille_terrain* 2;
+    vec3 p = { t ,t,0 };
+    terrain_ile.position[0] = p;
+    terrain_ile.position[1] = { -t,t,0 };
+    terrain_ile.position[2] = { -t,-t,0 };
+    terrain_ile.position[3] = { t,-t,0 };
+    const uint3 triangle_1 = { 0,   1 , 2 };
+    const uint3 triangle_2 = { 2,   3 , 0 };
+    terrain_ile.connectivity.push_back(triangle_1);
+    terrain_ile.connectivity.push_back(triangle_2);
+    terrain_ile.fill_empty_field();
+    terrain_ile.uv[0] = { 100.0f,100.0f };
+    terrain_ile.uv[1] = { -100.0f,100.0f };
+    terrain_ile.uv[2] = { -100.0f,-100.0f };
+    terrain_ile.uv[3] = { 100.0f,-100.0f };
+    return terrain_ile;
+}
+
+vector<vec3> generate_positions_ile_inf(int N) {
+    std::vector<vec3> a;
+
+    vec3 b;
+    float FLOAT_MIN = -(float)taille_terrain + 10.0f;
+    float FLOAT_MAX = (float)taille_terrain - 10.0f;
+
+    for (int i = 0; i < N; i++) {
+        int c = false;
+        int nb = 0;
+        while (!c && nb<400) {
+            b = { FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN), FLOAT_MIN + rand_interval() * (FLOAT_MAX - FLOAT_MIN) , 0 };
+            c = true;
+            //std::cout << b << "; " << a.size() << std::endl;
+            for (size_t k = 0; k < a.size(); k++) {
+                if (std::abs(a[k][0] - b[0]) < 20
+                    && std::abs(a[k][1] - b[1]) < 20) {
+                    c = false;
+                }
+            }
+            if (std::abs(b[0]) < taille_terrain/2 + 10 && std::abs(b[1]) < taille_terrain/2 + 10) { 
+                c = false; 
+                
+            }
+            nb++;
+        }
+        std::cout << "nb " << nb << std::endl;
+        if (nb < 400) {
+            a.push_back(b);
+        }
+        
+    }
+    std::cout << taille_terrain<< std::endl;
+    for (int k = 0; k < a.size(); k++){
+        std::cout << a[k] << std::endl;
+    }
+
+    return a;
 }

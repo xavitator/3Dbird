@@ -20,6 +20,7 @@ mesh_drawable cloud3;
 mesh_drawable cloud4;
 mesh_drawable ship;
 mesh_drawable ring;
+mesh_drawable ocean_inf;
 
 hierarchy_mesh_drawable hierarchy_bird;
 vec3 orientation_bird = {0,1,0};
@@ -31,6 +32,7 @@ mesh_drawable billboard_grass;
 mesh_drawable billboard_bird;
 std::vector<mesh_drawable> liste_iles;
 std::vector<vcl::vec3> ile_position;
+std::vector<vcl::vec3> ile_position_inf;
 std::vector<std::vector<vcl::vec3>> liste_tree_position;
 std::vector<float> ile_orientation;
 std::vector<vcl::vec3> cloud_position;

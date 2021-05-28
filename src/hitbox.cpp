@@ -75,8 +75,11 @@ int hit_ile(int k) {
 	vec3 pos = get_pos_bird();
 	float u = ((float)pos[0] - ile_position[k][0]) / 20 + 0.5f;
 	float v = ((float)pos[1] - ile_position[k][1]) / 20 + 0.5f;
+	std::cout << u << ";" << v << endl;
 	vec3 a = evaluate_terrain(u, v, liste_noise_ile[k]);
-	if (a[2] > pos[2] - 0.1f) return 1;
+
+	std::cout << pos[2] << ";" << a[2] << endl;
+	if (a[2] > pos[2] - 0.15f) return 1;
 	return -1;
 }
 
@@ -114,7 +117,13 @@ int hit_ship() {
 		float theta = ship_orientation[j];
 		float x1 = cos(theta) * (x - ship_position[j][0]) + sin(theta) * (y - ship_position[j][1]);
 		float x2 = -sin(theta) * (x - ship_position[j][0]) + cos(theta) * (y - ship_position[j][1]);
-		if (vcl::abs(x1) < 5 && vcl::abs(x2) < 2 && pos[2] < 3.5f) return 1;
+		if (vcl::abs(x1) < 2.5f && vcl::abs(x2) < 1.5f && (pos[2] - ship_position[j][2]) < 3.0f) {
+			
+			return 1; }
+		if (vcl::abs(x1 - 0.2f) < 0.7f && vcl::abs(x2) < 1.5f && (pos[2]- ship_position[j][2]) < 6.0f) {
+			std::cout << ship_position[j][2]<<";" << pos[2] << std::endl;
+			return 1;
+		}
 	}
 	return -1;
 }
@@ -145,7 +154,8 @@ int hit_ois() {
 			if (hit_arbre(indice_ile) > -1) return TREE_ROCK;
 		}
 		else {
-			float z = ocean_height(pos[0], pos[1], taille_terrain, parameters, 0.2f);
+			float z = ocean_height(pos[0]+taille_terrain/2, pos[1] + taille_terrain / 2, taille_terrain, parameters);
+			std::cout << z <<";"<< pos[2]<< std::endl;
 			if (z > pos[2] - 0.1f) return OCEAN;
 			if (hit_ship() > -1) return SHIP;
 		}

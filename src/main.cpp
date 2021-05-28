@@ -53,32 +53,38 @@ int main(int, char* argv[])
 	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window))
 	{
-		// scene.light = scene.camera.position();
-		user.fps_record.update();
-		
-		glClearColor(189 / 255.0f, 217 / 255.0f, 242 / 255.0f, 0.95f);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		imgui_create_frame();
-		if(user.fps_record.event) {
-			std::string const title = "VCL Display - "+str(user.fps_record.fps)+" fps";
-			glfwSetWindowTitle(window, title.c_str());
+		generate_terrain();
+		hierarchy_bird["body"].transform.translate = { 0,0,5 };
+		pos_without_oscill = hierarchy_bird["body"].transform.translate;
+		int b = -1;
+		while ((b == -1 ||b == 7 || true) && !glfwWindowShouldClose(window)) {
+			// scene.light = scene.camera.position();
+			user.fps_record.update();
+
+			glClearColor(189 / 255.0f, 217 / 255.0f, 242 / 255.0f, 0.95f);
+			glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			imgui_create_frame();
+			if (user.fps_record.event) {
+				std::string const title = "VCL Display - " + str(user.fps_record.fps) + " fps";
+				glfwSetWindowTitle(window, title.c_str());
+			}
+
+			ImGui::Begin("GUI", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+			//user.cursor_on_gui = ImGui::GetIO().WantCaptureMouse;
+
+			if (user.gui.display_frame) draw(user.global_frame, scene);
+
+			display_interface();
+			display_scene();
+
+			ImGui::End();
+			imgui_render_frame(window);
+			glfwSwapBuffers(window);
+			glfwPollEvents();
+			b = hit_ois();
+			std::cout << b << std::endl;
 		}
-
-		ImGui::Begin("GUI",NULL,ImGuiWindowFlags_AlwaysAutoResize);
-		//user.cursor_on_gui = ImGui::GetIO().WantCaptureMouse;
-
-		if(user.gui.display_frame) draw(user.global_frame, scene);
-
-		display_interface();
-		display_scene();
-
-		ImGui::End();
-		imgui_render_frame(window);
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-		int a = hit_ois();
-		// std::cout << a << std::endl;
 	}
 
 	imgui_cleanup();
@@ -114,7 +120,7 @@ void initialize_data()
 	tree = mesh_drawable(create_tree());
 	
 	
-	wall = mesh_drawable(create_wall(taille_terrain));
+	wall = mesh_drawable(create_wall());
 	image_raw const im3 = image_load_png("assets/rayure1.png");
 
 	// Send this image to the GPU, and get its identifier texture_image_id
@@ -144,7 +150,7 @@ void initialize_data()
 	ring.shading.color = { 1.0f,0,0 };
 	ring.transform.scale = 0.5f;
 
-	ocean_m = create_ocean(parameters, taille_terrain);
+	ocean_m = create_ocean(parameters);
 	ocean = mesh_drawable(ocean_m);
 	//ocean.shading.color = { 0.0f, 0.0f, 1.0f };
 	image_raw const im4 = image_load_png("assets/ocean.png");
@@ -153,6 +159,9 @@ void initialize_data()
 		GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
 
 	ocean.texture = texture_image_id4;
+
+	ocean_inf = mesh_drawable(create_ocean_infini());
+	ocean_inf.texture = texture_image_id4;
 
 	create_bird();
 
@@ -168,7 +177,9 @@ using draw_func = std::function<void(mesh_drawable const& drawable, scene_enviro
 void display_scene()
 {	
 	
-	update_ocean(ocean_m, ocean, parameters, v_maree);
+	update_ocean(ocean_m, ocean, parameters);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
 		ocean.transform.translate = { 0,0,0 };
 		draw_element(ocean, scene);	
@@ -198,7 +209,7 @@ void display_scene()
 		}
 		for (int k = 0; k< nb_ship; k++) {
 			ship.transform.translate = ship_position[k];
-			ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters, v_maree) *0.8f};
+			ship.transform.translate += {0, 0, ocean_height(ship_position[k][0]+taille_terrain/2, ship_position[k][1] + taille_terrain / 2, taille_terrain, parameters) *0.8f};
 			ship.transform.rotate = rotation({ { cos(ship_orientation[k]),0,sin(ship_orientation[k]) }, { sin(ship_orientation[k]),0,-cos(ship_orientation[k]) },{0,1,0} });
 			//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
 			draw_element(ship, scene);
@@ -207,7 +218,7 @@ void display_scene()
 		draw_element(cloud1, scene);
 		int j = 3;
 		for (int i = 0; i < cloud_position.size(); i++) {
-			cloud_position[i] = cloud_deplacement(cloud_position[i], taille_terrain);
+			cloud_position[i] = cloud_deplacement(cloud_position[i]);
 			if (j == 0) {
 				
 				cloud1.transform.translate = cloud_position[i];
@@ -240,6 +251,7 @@ void display_scene()
 			draw_element(ring, scene);
 		}
 		
+		
 	};
 
 	// First pass: draw all shapes that cast shadows
@@ -262,6 +274,15 @@ void display_scene()
 		draw_all(draw_with_shadow);
 
 	}
+	for (int i = 0; i < ile_position_inf.size(); i++) {
+		liste_iles[0].transform.translate = ile_position_inf[i];
+		draw(liste_iles[0], scene);
+	}
+	ship.transform.translate = { 0,0,0 };
+	draw(ship, scene);
+	ocean_inf.transform.translate = { 0,0,0 };
+	draw(ocean_inf, scene);
+	glDepthMask(false);
 	wall.transform.rotate = rotation({ 0,0,1 }, 0);
 	wall.transform.translate = { 0,0,0 };
 	draw(wall, scene);
@@ -274,6 +295,9 @@ void display_scene()
 	draw(wall, scene);
 	wall.transform.translate = { taille_terrain,0,0 };
 	draw(wall, scene);
+
+	glDepthMask(true);
+
 	
 	move_bird();
 	move_camera_center();
