@@ -75,10 +75,10 @@ int hit_ile(int k) {
 	vec3 pos = get_pos_bird();
 	float u = ((float)pos[0] - ile_position[k][0]) / 20 + 0.5f;
 	float v = ((float)pos[1] - ile_position[k][1]) / 20 + 0.5f;
-	std::cout << u << ";" << v << endl;
+	//std::cout << u << ";" << v << endl;
 	vec3 a = evaluate_terrain(u, v, liste_noise_ile[k]);
 
-	std::cout << pos[2] << ";" << a[2] << endl;
+	//std::cout << pos[2] << ";" << a[2] << endl;
 	if (a[2] > pos[2] - 0.15f) return 1;
 	return -1;
 }
@@ -163,7 +163,7 @@ int hit_ois() {
 		}
 		else {
 			float z = ocean_height(pos[0]+taille_terrain/2, pos[1] + taille_terrain / 2, taille_terrain, parameters);
-			std::cout << z <<";"<< pos[2]<< std::endl;
+			//std::cout << z <<";"<< pos[2]<< std::endl;
 			if (z > pos[2] - 0.1f) return OCEAN;
 			if (hit_ship() > -1) return SHIP;
 		}

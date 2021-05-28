@@ -70,3 +70,7 @@ int compare_vec(vec3 vec_1, vec3 vec_2) {
 	}
 	return 1;
 }
+
+float omega= 0.0f;
+float theta=0.0f;
+float vitesse = 0.0f;

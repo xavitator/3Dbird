@@ -3,7 +3,8 @@
 #include <iostream>
 #include <typeinfo>  //for 'typeid' to work  
 #include <cmath>
-
+#include "hitbox.hpp";
+#include "terrain.hpp";
 
 
 using namespace vcl;
@@ -210,4 +211,42 @@ void move_bird(){
 vec3 get_pos_bird(){
     vec3 pos = pos_without_oscill;
     return pos;
+}
+
+
+void fall() {
+
+    vec3 pos = get_pos_bird();
+    int k = on_ile();
+    if (k > -1 && hit_ile(k)>-1) return;
+    float t = timer.t;
+    timer.update();
+    float dt = timer.t - t;
+    std::cout << theta << std::endl;
+    if (theta < pi / 2) {
+        std::cout << "theta" << theta << std::endl;
+        omega = omega + cos(theta) * dt * 5;
+        theta = theta + omega * dt;
+        hierarchy_bird["body"].transform.rotate = rotation({ 1,0,0 }, -theta);
+        hierarchy_bird.update_local_to_global_coordinates();
+    }
+    else {
+        hierarchy_bird["body"].transform.rotate = rotation({ 1,0,0 }, -pi / 2);
+        hierarchy_bird.update_local_to_global_coordinates();
+    }
+    
+    float z = ocean_height(pos[0] + taille_terrain / 2, pos[1] + taille_terrain / 2, taille_terrain, parameters);
+    if (z > pos[2]-0.5f ) {
+        hierarchy_bird["body"].transform.translate = { pos[0],pos[1],z };
+        hierarchy_bird.update_local_to_global_coordinates();
+        //pos_without_oscill = hierarchy_bird["body"].transform.translate;
+        return;
+    }
+    
+    float g = 10.0f;
+    vitesse = vitesse + g * dt;
+    hierarchy_bird["body"].transform.translate = hierarchy_bird["body"].transform.translate - vec3{0, 0, vitesse *dt};
+    hierarchy_bird.update_local_to_global_coordinates();
+    pos_without_oscill = hierarchy_bird["body"].transform.translate;
+    return;
 }

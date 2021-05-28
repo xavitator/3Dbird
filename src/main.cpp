@@ -127,14 +127,17 @@ void update_from_timer(){
 void restart_game(){
 	generate_terrain();
 	user.dead = false;
-	pos_without_oscill = {0,0,5};
+	pos_without_oscill = { 0,0,5 };
 	hierarchy_bird["body"].transform.translate = pos_without_oscill;
-	orientation_bird = {0,1,0};
+	orientation_bird = { 0,1,0 };
 	hierarchy_bird["body"].transform.rotate = rotation();
-	rho_theta_phi = {5.0, 1.0, 1.0};
+	rho_theta_phi = { 5.0, 1.0, 1.0 };
 	int choc;
-	while( (choc = hit_ois()) >= 0 && choc <= 6 )
+	while ((choc = hit_ois()) >= 0 && choc <= 6)
 		generate_terrain();
+	omega = 00.0f;
+	theta = 0.0f;
+	vitesse = 0.0f;
 }
 
 void initialize_data()
@@ -344,7 +347,17 @@ void display_scene()
 		move_bird();
 		move_camera_center();
 	}
-    std::cout << "ee6" << std::endl;
+	else {
+		fall();
+		draw(hierarchy_bird, scene);
+		float rho = rho_theta_phi[0];
+		float theta = pi / 4;
+		float phi = pi / 4;
+		vec3 pos_bird = get_pos_bird();
+		vec3 pos_centered = { rho * std::sin(theta) * std::cos(phi), rho * std::sin(theta) * std::sin(phi), rho * std::cos(theta) };
+		scene.camera.look_at(pos_centered + pos_bird, pos_bird, { 0,0,rho });
+		move_camera_center();
+	}
 }
 int n_taille_terrain = taille_terrain;
 void display_interface()
@@ -353,6 +366,22 @@ void display_interface()
 	
 	ImGui::Text("Score : %ld", user.score);
 	ImGui::Separator();
+
+	if(ImGui::CollapsingHeader("Aide")){
+		ImGui::BulletText("L'objectif du jeu est de rester en vie autant que vous le pouvez. Vos points sont accumulés avec le temps.\n");
+		ImGui::BulletText("Appuyer sur CTRL pour faire apparaître le curseur de la souris.\n");
+		ImGui::BulletText("L'oiseau avance de plus en plus rapidement avec le temps.\n");
+		ImGui::BulletText("Pour bouger l'oiseau, vous pouvez utiliser les commandes suivantes :\n");
+		ImGui::BulletText("- AWSD\n");
+		ImGui::BulletText("- QZSD\n");
+		ImGui::BulletText("- les flèches du clavier\n");
+		ImGui::BulletText("Voici les pouvoirs de chacun des cercles :\n");
+		ImGui::BulletText("- cercle rouge : rapporte 10 points\n");
+		ImGui::BulletText("- cercle bleu : rapporte 10 points mais augmente le facteur de vitesse\n");
+		ImGui::BulletText("- cercle vert : rapporte 5 points et diminue le facteur de vitesse\n");
+		ImGui::BulletText("- cercle or : rapporte 100 points\n");
+	}
+
 	if (ImGui::CollapsingHeader("Paramètres"))
     {
 		ImGui::Text("Vous pouvez modifier de jeu :");
