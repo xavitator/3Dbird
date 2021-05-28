@@ -368,18 +368,18 @@ void display_interface()
 	ImGui::Separator();
 
 	if(ImGui::CollapsingHeader("Aide")){
-		ImGui::BulletText("L'objectif du jeu est de rester en vie autant que vous le pouvez. Vos points sont accumulés avec le temps.\n");
-		ImGui::BulletText("Appuyer sur CTRL pour faire apparaître le curseur de la souris.\n");
-		ImGui::BulletText("L'oiseau avance de plus en plus rapidement avec le temps.\n");
-		ImGui::BulletText("Pour bouger l'oiseau, vous pouvez utiliser les commandes suivantes :\n");
-		ImGui::BulletText("- AWSD\n");
-		ImGui::BulletText("- QZSD\n");
-		ImGui::BulletText("- les flèches du clavier\n");
-		ImGui::BulletText("Voici les pouvoirs de chacun des cercles :\n");
-		ImGui::BulletText("- cercle rouge : rapporte 10 points\n");
-		ImGui::BulletText("- cercle bleu : rapporte 10 points mais augmente le facteur de vitesse\n");
-		ImGui::BulletText("- cercle vert : rapporte 5 points et diminue le facteur de vitesse\n");
-		ImGui::BulletText("- cercle or : rapporte 100 points\n");
+		ImGui::Text("L'objectif du jeu est de rester en vie autant que vous le pouvez. Vos points sont accumulés avec le temps.\n");
+		ImGui::Text("Appuyer sur CTRL pour faire apparaître le curseur de la souris.\n");
+		ImGui::Text("L'oiseau avance de plus en plus rapidement avec le temps.\n");
+		ImGui::Text("Pour bouger l'oiseau, vous pouvez utiliser les commandes suivantes :\n");
+		ImGui::BulletText(" AWSD\n");
+		ImGui::BulletText(" QZSD\n");
+		ImGui::BulletText(" les flèches du clavier\n");
+		ImGui::Text("Voici les pouvoirs de chacun des cercles :\n");
+		ImGui::BulletText(" cercle rouge : rapporte 10 points\n");
+		ImGui::BulletText(" cercle bleu : rapporte 10 points mais augmente le facteur de vitesse\n");
+		ImGui::BulletText(" cercle vert : rapporte 5 points et diminue le facteur de vitesse\n");
+		ImGui::BulletText(" cercle or : rapporte 100 points\n");
 	}
 
 	if (ImGui::CollapsingHeader("Paramètres"))
