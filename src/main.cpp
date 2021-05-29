@@ -127,17 +127,19 @@ void update_from_timer(){
 void restart_game(){
 	generate_terrain();
 	user.dead = false;
+	user.score = 0;
+	user.speed = 0.001f;
 	pos_without_oscill = { 0,0,5 };
 	hierarchy_bird["body"].transform.translate = pos_without_oscill;
 	orientation_bird = { 0,1,0 };
 	hierarchy_bird["body"].transform.rotate = rotation();
 	rho_theta_phi = { 5.0, 1.0, 1.0 };
+	omega = 0.0f;
+	theta = 0.0f;
+	vitesse = 0.0f;
 	int choc;
 	while ((choc = hit_ois()) >= 0 && choc <= 6)
 		generate_terrain();
-	omega = 00.0f;
-	theta = 0.0f;
-	vitesse = 0.0f;
 }
 
 void initialize_data()
