@@ -17,8 +17,8 @@ class Ring{
         Ring(vec3 _position);
 
         virtual void cross();
-        static void get_position(std::vector<Ring> _list_ring, vec3 &_position, bool &exist);
-        static void add_ring(std::vector<Ring> &_list_ring, vec3 &_position);
+        static void get_position(std::vector<Ring *> _list_ring, vec3 &_position, bool &exist);
+        static void add_ring(std::vector<Ring *> &_list_ring, vec3 &_position);
 };
 
 class accelerationRing : public Ring {
@@ -41,6 +41,14 @@ class goldenRing : public Ring {
 
     public : 
         goldenRing(vec3 _position);
+
+        void cross();
+};
+
+class deadRing : public Ring {
+
+    public : 
+        deadRing(vec3 _position);
 
         void cross();
 };

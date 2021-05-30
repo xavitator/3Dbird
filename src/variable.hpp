@@ -120,7 +120,7 @@ extern std::vector<float> cloud_orientation;
 extern std::vector<vcl::vec3> ship_position;
 extern std::vector<float> ship_orientation;
 
-extern std::vector<Ring> ring_objects;
+extern std::vector<Ring *> ring_objects;
 
 extern std::vector<perlin_noise_parameters> liste_noise_ile;
 

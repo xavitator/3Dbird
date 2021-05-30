@@ -43,7 +43,7 @@ std::vector<float> cloud_orientation;
 std::vector<vcl::vec3> ship_position;
 std::vector<float> ship_orientation;
 
-std::vector<Ring> ring_objects;
+std::vector<Ring *> ring_objects;
 
 std::vector<perlin_noise_parameters> liste_noise_ile;
 

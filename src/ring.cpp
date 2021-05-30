@@ -14,7 +14,7 @@ void Ring::cross(){
     user.score += 10;
 }
 
-void Ring::get_position(std::vector<Ring> _list_ring, vec3 &_position, bool &exist){
+void Ring::get_position(std::vector<Ring*> _list_ring, vec3 &_position, bool &exist){
     int nb = 0;
     int c = false;
     float FLOAT_MIN = -(float)taille_terrain / 2.0f;
@@ -27,7 +27,7 @@ void Ring::get_position(std::vector<Ring> _list_ring, vec3 &_position, bool &exi
         _position[2] = HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN);
         c = true;
         for (size_t k = 0; k < _list_ring.size(); k++) {
-            vec3 element = _list_ring[k].position;
+            vec3 element = _list_ring[k]->position;
             if (element[0] - _position[0] <5 && element[0] - _position[0]>-5 && element[1] - _position[1] <5 && element[1] - _position[1]>-5) {
                 c = false;
             }
@@ -42,19 +42,22 @@ void Ring::get_position(std::vector<Ring> _list_ring, vec3 &_position, bool &exi
         exist = true;
 }
 
-void Ring::add_ring(std::vector<Ring> &_list_ring, vec3 &_position){
-    int alea = std::floor(rand_interval() * 20);
+void Ring::add_ring(std::vector<Ring *> &_list_ring, vec3 &_position){
+    int alea = std::floor(rand_interval() * 21);
     if(alea == 0){
-        _list_ring.push_back(goldenRing(_position));
+        _list_ring.push_back(new goldenRing(_position));
+    }
+    else if(alea == 1){
+        _list_ring.push_back(new deadRing(_position));
     }
     else if(alea < 5){
-        _list_ring.push_back(decelerationRing(_position));
+        _list_ring.push_back(new decelerationRing(_position));
     }
     else if(alea < 9){
-        _list_ring.push_back(accelerationRing(_position));
+        _list_ring.push_back(new accelerationRing(_position));
     }
     else
-        _list_ring.push_back(Ring(_position));
+        _list_ring.push_back(new Ring(_position));
 }
 
 accelerationRing::accelerationRing(vec3 _position) : Ring(_position) {
@@ -81,4 +84,12 @@ goldenRing::goldenRing(vec3 _position) : Ring(_position){
 
 void goldenRing::cross(){
     user.score += 100;
+}
+
+deadRing::deadRing(vec3 _position) : Ring(_position){
+    color = vec3(0, 0, 0);
+}
+
+void deadRing::cross(){
+    user.dead = true;
 }

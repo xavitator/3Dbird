@@ -1,6 +1,8 @@
 
 #include "view.hpp"
 #include "variable.hpp"
+#include "terrain.hpp"
+#include <algorithm>
 
 double approx = 0.0001;
 
@@ -24,6 +26,30 @@ void change_angle_to_non_zero(double &val){
 	}
 }
 
+int on_ile_cam(float x, float y) {
+	for (int k = 0; k < ile_position.size(); k++) {
+		if (vcl::abs(x - ile_position[k][0]) < 10 && vcl::abs(y - ile_position[k][1]) < 10) {
+			return k;
+		}
+	}
+	return -1;
+}
+
+float height_ile(float x, float y) {
+	int k = on_ile_cam(x,y);
+	if(k < 0) return -1;
+	float u = ((float)x - ile_position[k][0]) / 20 + 0.5f;
+	float v = ((float)y - ile_position[k][1]) / 20 + 0.5f;
+	//std::cout << u << ";" << v << endl;
+	vec3 a = evaluate_terrain(u, v, liste_noise_ile[k]);
+	return a[2];
+}
+
+float height_ocean(float x, float y){
+	float z = ocean_height(x+taille_terrain/2, y + taille_terrain / 2, taille_terrain, parameters);
+	return z;
+}
+
 void move_camera_rotation(vec2 p0, vec2 p1){
 
 	vec3 pos_bird = get_pos_bird();
@@ -40,7 +66,23 @@ void move_camera_rotation(vec2 p0, vec2 p1){
 
 	rho_theta_phi = {rho, theta, phi};
 
-	scene.camera.look_at(pos_centered + pos_bird, pos_bird, {0,0,rho});
+	vec3 pos_cam = pos_centered + pos_bird;
+
+	float x = pos_cam[0];
+
+	x = std::min(std::max(x, - taille_terrain/2.0f), taille_terrain / 2.0f);
+
+	float y = pos_cam[1];
+
+	y = std::min(std::max(y, - taille_terrain/2.0f), taille_terrain / 2.0f);
+
+	float z_terrain = std::max(height_ile(x,y), height_ocean(x,y));
+
+	float z = std::max(pos_cam[2], z_terrain);
+
+	pos_cam = {x,y,z};
+
+	scene.camera.look_at(pos_cam, pos_bird, {0,0,rho});
 }
 
 // Store keyboard state

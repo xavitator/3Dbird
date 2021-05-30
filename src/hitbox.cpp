@@ -121,7 +121,6 @@ int hit_ship() {
 			
 			return 1; }
 		if (vcl::abs(x1 - 0.2f) < 0.7f && vcl::abs(x2) < 1.5f && (pos[2]- ship_position[j][2]) < 6.0f) {
-			std::cout << ship_position[j][2]<<";" << pos[2] << std::endl;
 			return 1;
 		}
 	}
@@ -132,7 +131,7 @@ int hit_ring() {
 	{
 		vec3 pos = get_pos_bird();
 		for (int j = 0; j < ring_objects.size(); j++) {
-			Ring b = ring_objects[j];
+			Ring b = *ring_objects[j];
 			float theta = b.orientation;
 			vec3 ring_pos = b.position;
 			float x1 = cos(theta) * (pos[0] - ring_pos[0]) + sin(theta) * (pos[1] - ring_pos[1]);

@@ -94,9 +94,10 @@ int main(int, char* argv[])
 			update_from_timer();
 			if(a == RING){
 					int ind = hit_ring();
-					Ring r = ring_objects[ind];
-					r.cross();
+					Ring *r = ring_objects[ind];
+					r->cross();
 					ring_objects.erase(ring_objects.begin() + ind);
+					delete r;
 			}
 		}
 }
@@ -137,6 +138,7 @@ void restart_game(){
 	omega = 0.0f;
 	theta = 0.0f;
 	vitesse = 0.0f;
+	timer = timer_basic();
 	int choc;
 	while ((choc = hit_ois()) >= 0 && choc <= 6)
 		generate_terrain();
@@ -214,16 +216,13 @@ using draw_func = std::function<void(mesh_drawable const& drawable, scene_enviro
 void display_scene()
 {	
 	
-	std::cout << "aa" << std::endl;
 
 	update_ocean(ocean_m, ocean, parameters);
-    std::cout << "aa1" << std::endl;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	std::function<void(draw_func)> draw_all = [](draw_func draw_element) -> void {
 		ocean.transform.translate = { 0,0,0 };
 		draw_element(ocean, scene);	
-		std::cout << liste_iles.size() << std::endl;
 		for (int k = 0; k < liste_iles.size(); k++) {
 			liste_iles[k].transform.translate = ile_position[k];
 			//liste_iles[k].transform.rotate = rotation({ 0,0,1 }, ile_orientation[k]);
@@ -286,15 +285,14 @@ void display_scene()
 			}
 		}
 		for (int i = 0; i < ring_objects.size(); i++) {
-			ring.transform.translate = ring_objects[i].position;
-			ring.shading.color = ring_objects[i].color;
-			ring.transform.rotate = rotation({ 0,0,1 }, ring_objects[i].orientation);
+			ring.transform.translate = ring_objects[i]->position;
+			ring.shading.color = ring_objects[i]->color;
+			ring.transform.rotate = rotation({ 0,0,1 }, ring_objects[i]->orientation);
 			draw_element(ring, scene);
 		}
 		
 		
 	};
-    std::cout << "ee" << std::endl;
 
 	// First pass: draw all shapes that cast shadows
 	{
@@ -307,7 +305,6 @@ void display_scene()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); opengl_check;
 		
 	}
-    std::cout << "ee1" << std::endl;
 
 	// Second pass: Draw all shapes that receives shadows
 	{
@@ -317,17 +314,14 @@ void display_scene()
 		draw_all(draw_with_shadow);
 
 	}
-    std::cout << "ee2" << std::endl;
 	for (int i = 0; i < ile_position_inf.size(); i++) {
 		liste_iles[0].transform.translate = ile_position_inf[i];
 		draw(liste_iles[0], scene);
 	}
-    std::cout << "ee3" << std::endl;
 	ship.transform.translate = { 0,0,0 };
 	draw(ship, scene);
 	ocean_inf.transform.translate = { 0,0,0 };
 	draw(ocean_inf, scene);
-    std::cout << "ee4" << std::endl;
 	glDepthMask(false);
 	wall.transform.rotate = rotation({ 0,0,1 }, 0);
 	wall.transform.translate = { 0,0,0 };
@@ -342,7 +336,6 @@ void display_scene()
 	wall.transform.translate = { taille_terrain,0,0 };
 	draw(wall, scene);
 
-    std::cout << "ee5" << std::endl;
 	glDepthMask(true);
 
 	if(! user.dead){
@@ -382,6 +375,7 @@ void display_interface()
 		ImGui::BulletText(" cercle bleu : rapporte 10 points mais augmente le facteur de vitesse\n");
 		ImGui::BulletText(" cercle vert : rapporte 5 points et diminue le facteur de vitesse\n");
 		ImGui::BulletText(" cercle or : rapporte 100 points\n");
+		ImGui::BulletText(" cercle noir : il vous tue instantanément\n");
 		ImGui::Text("Entre deux parties, vous pourrez changer les paramètres de génération de la carte.\n");
 	}
 

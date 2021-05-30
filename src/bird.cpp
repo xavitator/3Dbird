@@ -275,9 +275,7 @@ void fall() {
     float t = timer.t;
     timer.update();
     float dt = timer.t - t;
-    std::cout << theta << std::endl;
     if (theta < pi / 2) {
-        std::cout << "theta" << theta << std::endl;
         omega = omega + cos(theta) * dt * 5;
         theta = theta + omega * dt;
         hierarchy_bird["body"].transform.rotate = rotation({ 1,0,0 }, -theta);

@@ -247,7 +247,6 @@ vector<vec3> generate_positions_ile() {
                 break;
         a.push_back(b);
     }
-    std::cout << a.size() << std::endl;
     std::sort(a.begin(), a.end(), compare_vec);
     return a;
 }
@@ -345,7 +344,6 @@ vector<vec3> generate_positions_ships() {
                 }
             }
             for (size_t k = 0; k < ile_position.size(); k++) {
-                std::cout << std::abs(ile_position[k][0] - b[0]) << std::endl;
                 if (std::abs(ile_position[k][0] - b[0]) < 15 && std::abs(ile_position[k][1] - b[1]) <15 ) {
                     c = false;
                 }
@@ -432,6 +430,8 @@ vcl::vec3 cloud_deplacement(vcl::vec3 position_initiale)
 
 
 void generate_terrain() {
+    for(auto o : ring_objects)
+        delete o;
     ring_objects.clear();
     generate_positions_ring();
 
