@@ -3,13 +3,13 @@
 #include <iostream>
 #include <list>
 #include "vcl/vcl.hpp"
+#include "ring.hpp"
 
 using namespace vcl;
 
 struct gui_parameters {
 	bool display_frame = true;
     bool display_surface = true;
-	bool display_wireframe = false;
 	bool add_sphere = true;
 };
 
@@ -24,10 +24,10 @@ struct keyboard_state_parameters{
 
 struct perlin_noise_parameters
 {
-	float persistency = 0.368f;
-	float frequency_gain = 2.9f;
+	float persistency = 0.28f;
+	float frequency_gain = 2.5f;
 	int octave = 8;
-	float terrain_height = 0.114f;
+	float terrain_height = 0.104f;
 };
 
 struct user_interaction_parameters {
@@ -38,17 +38,38 @@ struct user_interaction_parameters {
 	bool cursor_on_gui;
     bool display_frame = true;
 	keyboard_state_parameters keyboard_state;
-	float speed = 1.0f;
+	uint64_t score = 0;
+	bool dead = false;
+	float speed = 0.001f;
+};
+
+struct shadow_map_parameters 
+{
+	GLuint texture;
+	int width;
+	int height;
+	GLuint fbo;
+	GLuint shader;
 };
 
 struct scene_environment
 {
 	camera_around_center camera;
 	mat4 projection;
-	vec3 light;
+	camera_spherical_coordinates light;
+	shadow_map_parameters depth_map;
 };
 
-
+enum Collision {
+    ILE = 1,
+    TREE_ROCK,
+    OCEAN,
+    SHIP,
+    CLOUD,
+    BORDER,
+	RING,
+    CEILING
+};
 
 extern mesh terrain;
 extern mesh_drawable terrain_visual;
@@ -58,6 +79,8 @@ extern std::vector<vcl::vec3> tree_position;
 extern perlin_noise_parameters parameters;
 
 extern timer_basic timer;
+extern timer_event_periodic period_1;
+extern timer_event_periodic period_10;
 
 extern user_interaction_parameters user;
 extern scene_environment scene;
@@ -76,7 +99,11 @@ extern mesh_drawable cloud3;
 extern mesh_drawable cloud4;
 extern mesh_drawable ship;
 extern mesh_drawable ring;
+extern mesh_drawable ocean_inf;
 
+extern hierarchy_mesh_drawable hierarchy_bird;
+extern vec3 orientation_bird;
+extern vec3 pos_without_oscill;
 
 extern std::vector<vcl::vec3> tree_position;
 extern perlin_noise_parameters parameters;
@@ -84,6 +111,7 @@ extern mesh_drawable billboard_grass;
 extern mesh_drawable billboard_bird;
 extern std::vector<mesh_drawable> liste_iles;
 extern std::vector<vcl::vec3> ile_position;
+extern std::vector<vcl::vec3> ile_position_inf;
 extern std::vector<std::vector<vcl::vec3>> liste_tree_position;
 extern std::vector<float> ile_orientation;
 extern std::vector<vcl::vec3> cloud_position;
@@ -91,8 +119,7 @@ extern std::vector<float> cloud_orientation;
 extern std::vector<vcl::vec3> ship_position;
 extern std::vector<float> ship_orientation;
 
-extern std::vector<vcl::vec3> ring_position;
-extern std::vector<float> ring_orientation;
+extern std::vector<Ring *> ring_objects;
 
 extern std::vector<perlin_noise_parameters> liste_noise_ile;
 
@@ -101,4 +128,22 @@ extern int nb_iles;
 extern int nb_arbres;
 extern int nb_cloud;
 extern int nb_ship;
-extern int nb_ring; 
+extern int nb_ring;
+extern float v_maree;
+extern float fact_rot_cam;
+extern float rot_facteur_bird;
+extern vec3 rho_theta_phi;
+extern float initial_speed;
+extern int ceiling_height;
+extern int limite_essai;
+extern int width;
+extern int height;
+extern vec3 color_bird;
+
+/**
+ * @brief Pour la chute de l'oiseau
+ * 
+ */
+extern float omega;
+extern float theta;
+extern float vitesse;
