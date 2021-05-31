@@ -172,8 +172,6 @@ void display_scene()
 			//ship.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
 			draw_element(ship, scene);
 		}
-		cloud1.transform.translate = { 0,0,0 };
-		draw_element(cloud1, scene);
 		int j = 3;
 		for (int i = 0; i < cloud_position.size(); i++) {
 			cloud_position[i] = cloud_deplacement(cloud_position[i]);
@@ -237,8 +235,6 @@ void display_scene()
 		liste_iles[0].transform.translate = ile_position_inf[i];
 		draw(liste_iles[0], scene);
 	}
-	ship.transform.translate = { 0,0,0 };
-	draw(ship, scene);
 	ocean_inf.transform.translate = { 0,0,0 };
 	draw(ocean_inf, scene);
 	glDepthMask(false);
