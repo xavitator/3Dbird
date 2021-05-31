@@ -1,7 +1,13 @@
 #include "shadow_map.hpp"
+#include "controller.hpp"
 
 using namespace vcl;
 
+/**
+ * @brief Initialisation du buffer pour les ombres
+ * 
+ * @return shadow_map_parameters 
+ */
 shadow_map_parameters initialize_depth_map()
 {
 	GLuint texture;
@@ -39,7 +45,12 @@ shadow_map_parameters initialize_depth_map()
 	return shadow_map_parameters{texture, s_width, s_height, fbo, shader};
 }
 
-
+/**
+ * @brief Afficher les éléments en prenant en compte le buffer d'ombre précédemment calculé
+ * 
+ * @param drawable élément à afficher
+ * @param scene scène sur laquelle on affiche l'élément
+ */
 void draw_with_shadow(mesh_drawable const& drawable, scene_environment const& scene)
 {
 	// Setup shader
@@ -75,6 +86,12 @@ void draw_with_shadow(mesh_drawable const& drawable, scene_environment const& sc
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+/**
+ * @brief Calcule le buffer d'ombre des éléments qu'on veut afficher
+ * 
+ * @param drawable élément à afficher
+ * @param scene scène sur laquelle on affiche l'élément
+ */
 void draw_depth_map(mesh_drawable const& drawable, scene_environment const& current_scene)
 {
 	GLuint shader = current_scene.depth_map.shader;

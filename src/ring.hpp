@@ -7,6 +7,10 @@
 using namespace vcl;
 
 
+/**
+ * @brief Anneau classique
+ * 
+ */
 class Ring{
 
     public :
@@ -15,12 +19,19 @@ class Ring{
         vec3 color;
 
         Ring(vec3 _position);
+        virtual ~Ring(){};
+
+        bool choc(vec3 o);
 
         virtual void cross();
         static void get_position(std::vector<Ring *> _list_ring, vec3 &_position, bool &exist);
         static void add_ring(std::vector<Ring *> &_list_ring, vec3 &_position);
 };
 
+/**
+ * @brief Anneau d'accélération
+ * 
+ */
 class accelerationRing : public Ring {
 
     public : 
@@ -29,6 +40,10 @@ class accelerationRing : public Ring {
         void cross();
 };
 
+/**
+ * @brief Anneau de déceleration
+ * 
+ */
 class decelerationRing : public Ring {
 
     public : 
@@ -37,6 +52,10 @@ class decelerationRing : public Ring {
         void cross();
 };
 
+/**
+ * @brief Anneau d'or (similaire au vif d'or)
+ * 
+ */
 class goldenRing : public Ring {
 
     public : 
@@ -45,6 +64,10 @@ class goldenRing : public Ring {
         void cross();
 };
 
+/**
+ * @brief Anneau de la mort
+ * 
+ */
 class deadRing : public Ring {
 
     public : 

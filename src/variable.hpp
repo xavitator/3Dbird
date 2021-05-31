@@ -10,7 +10,6 @@ using namespace vcl;
 struct gui_parameters {
 	bool display_frame = true;
     bool display_surface = true;
-	bool display_wireframe = false;
 	bool add_sphere = true;
 };
 
@@ -139,9 +138,12 @@ extern int ceiling_height;
 extern int limite_essai;
 extern int width;
 extern int height;
+extern vec3 color_bird;
 
-int compare_vec(vec3 vec_1, vec3 vec_2);
-
+/**
+ * @brief Pour la chute de l'oiseau
+ * 
+ */
 extern float omega;
 extern float theta;
 extern float vitesse;

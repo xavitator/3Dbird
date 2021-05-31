@@ -8,12 +8,45 @@
 
 using namespace vcl;
 
+/**
+ * @brief Construct a new Ring:: Ring object
+ * 
+ * @param _position position de l'anneau
+ */
 Ring::Ring(vec3 _position) : position(_position), orientation(rand_interval() * pi), color(1.0f, 0, 0){}
 
+/**
+ * @brief Comportement lorsqu'un anneau est croisé
+ * 
+ */
 void Ring::cross(){
     user.score += 10;
 }
 
+/**
+ * @brief Choc entre un anneau et une position
+ * 
+ * @param o position du prochain anneau
+ * @return true il y a choc
+ * @return false pas de choc
+ */
+bool Ring::choc(vec3 o){
+    for (size_t i = 0; i < 3; i++)
+    {
+        if(std::abs(position[i] - o[i]) > 5)
+            return false;
+    }
+    return true;
+}
+
+/**
+ * @brief Déterminer une position où on peut mettre un anneau. La position est stockée dans la variable `_position`. 
+ * Pour savoir si une position existe, nous changeons la variable `exist`.
+ * 
+ * @param _list_ring liste des anneaux existants
+ * @param _position position du prochain anneau
+ * @param exist est ce que la variable `_position` a été changé.
+ */
 void Ring::get_position(std::vector<Ring*> _list_ring, vec3 &_position, bool &exist){
     int nb = 0;
     int c = false;
@@ -27,8 +60,7 @@ void Ring::get_position(std::vector<Ring*> _list_ring, vec3 &_position, bool &ex
         _position[2] = HEIGHT_MIN + rand_interval() * (HEIGHT_MAX - HEIGHT_MIN);
         c = true;
         for (size_t k = 0; k < _list_ring.size(); k++) {
-            vec3 element = _list_ring[k]->position;
-            if (element[0] - _position[0] <5 && element[0] - _position[0]>-5 && element[1] - _position[1] <5 && element[1] - _position[1]>-5) {
+            if (_list_ring[k]->choc(_position)) {
                 c = false;
             }
         }
@@ -42,6 +74,12 @@ void Ring::get_position(std::vector<Ring*> _list_ring, vec3 &_position, bool &ex
         exist = true;
 }
 
+/**
+ * @brief Créer un anneau au hasard parmi ceux existant et l'ajoute dans la liste d'anneaux.
+ * 
+ * @param _list_ring liste d'anneaux
+ * @param _position position du nouvel anneau
+ */
 void Ring::add_ring(std::vector<Ring *> &_list_ring, vec3 &_position){
     int alea = std::floor(rand_interval() * 21);
     if(alea == 0){

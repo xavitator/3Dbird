@@ -59,17 +59,9 @@ float initial_speed = 1.05f;
 int ceiling_height = 11;
 int nb_ring = 100;
 float v_maree = 0.1f;
-int limite_essai = 10;
+int limite_essai = 50;
 int width = 1280, height = 1024;
-
-int compare_vec(vec3 vec_1, vec3 vec_2) {
-	if (vec_1[0] < vec_2[0]
-		|| (vec_1[0] == vec_2[0] && vec_1[1] < vec_2[1])
-        || (vec_1[0] == vec_2[0] && vec_1[1] == vec_2[1] && vec_1[2] <= vec_2[2])) {
-		return -1;
-	}
-	return 1;
-}
+vec3 color_bird = {1.0f, 1.0f, 1.0f};
 
 float omega= 0.0f;
 float theta=0.0f;

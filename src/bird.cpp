@@ -3,59 +3,23 @@
 #include <iostream>
 #include <typeinfo>  //for 'typeid' to work  
 #include <cmath>
-#include "hitbox.hpp";
-#include "terrain.hpp";
-
+#include "hitbox.hpp"
+#include "terrain.hpp"
+#include "tree.hpp"
+#include "controller.hpp"
 
 using namespace vcl;
 
-void opengl_uniform(GLuint shader, scene_environment const& current_scene);
-
-mesh create_cone_bird(float radius, float height, float z_offset)
-{
-    mesh m; 
-    
-    const size_t N = 20;
-
-    // Fill cone geometry
-    const vec3 base = {0, 0, z_offset};
-    m.position.push_back(base);
-    const unsigned int ib = 0;
-    const vec3 top = {0, 0, height + z_offset};
-    m.position.push_back(top);
-    const unsigned int it = 1;
-    for(unsigned int ku=0; ku<N; ++ku)
-    {
-        float u = ku/float(N);
-        const vec3 p = {radius * std::cos(2*3.14*u), radius * std::sin(2*3.14*u), z_offset};
-        m.position.push_back(p);
-    }
-
-    // Generate triangle organization
-    //  Parametric surface with uniform grid sampling: generate 2 triangles for each grid cell
-    for(size_t ku=0; ku<N; ++ku)
-    {
-        const unsigned int u0 = ku+2;
-        const unsigned int u1 = (ku + 1)%(N) + 2;
-
-        const uint3 t1 = {u0, u1, ib};
-        const uint3 t2 = {u0, u1, it};
-
-        m.connectivity.push_back(t1);
-        m.connectivity.push_back(t2);
-    }
-
-    m.fill_empty_field();
-    return m;
-}
-
+/**
+ * @brief Create a bird object
+ * 
+ */
 void create_bird(){
 
 	// Definition of the elements of the hierarchy_bird
 	// ------------------------------------------- //
 
 	float const radius_body = 0.25f;
-    float const radius_arm = 0.05f;
     float const length_arm = 0.3f;
 	float const radius_head = radius_body/2;
 	float const radius_noise = radius_head/2;
@@ -67,7 +31,7 @@ void create_bird(){
     mesh_drawable head = mesh_drawable( mesh_primitive_ellipsoid({radius_head, radius_head*1.1f, radius_head}, {0,0,0}, 40, 40));
 
     //mesh_drawable noise = mesh_drawable( mesh_primitive_triangle({radius_noise, radius_noise*2, 0}, {0,0,0}, 40, 40));
-    mesh_drawable noise = mesh_drawable( create_cone_bird(radius_noise/2, 3*radius_noise, 0) );
+    mesh_drawable noise = mesh_drawable( create_cone(radius_noise/2, 3*radius_noise, 0) );
 	noise.shading.color = {0,0,0};
 	noise.transform.rotate =  rotation({1,0,0}, -3.14f/2 );
 
@@ -124,6 +88,10 @@ void create_bird(){
     pos_without_oscill = hierarchy_bird["body"].transform.translate;
 }
 
+/**
+ * @brief Si l'oiseau touche le plafond `ceiling_height`, il tourne sur lui même pour repointer vers le bas.
+ * 
+ */
 void come_back_to_earth(){
     mat3 tmp = hierarchy_bird["body"].transform.rotate.matrix();
 
@@ -137,11 +105,11 @@ void come_back_to_earth(){
     }
 }
 
+/**
+ * @brief On calcule les mouvements de l'oiseau en fonction des touches sur lesquelles apuient le joueur. On fait aussi osciller les ailes de l'oiseau.
+ * 
+ */
 void move_bird(){
-    /** *************************************************************  **/
-    /** Compute the (animated) transformations applied to the elements **/
-    /** *************************************************************  **/
-
     timer.update();
     float t = timer.t;
 
@@ -244,16 +212,22 @@ void move_bird(){
 	hierarchy_bird.update_local_to_global_coordinates();
 	// display the hierarchy_bird
 	draw(hierarchy_bird, scene);
-	if(user.gui.display_wireframe)
-		draw_wireframe(hierarchy_bird, scene);
 }
 
+/**
+ * @brief Get the position of bird object
+ * 
+ * @return vec3 position de l'oiseau
+ */
 vec3 get_pos_bird(){
     vec3 pos = pos_without_oscill;
     return pos;
 }
 
-
+/**
+ * @brief Animation de chute de l'oiseau lorsque le joueurr rencontre un obstacle.
+ * 
+ */
 void fall() {
 
 
@@ -269,9 +243,10 @@ void fall() {
 
     hierarchy_bird["tail_left"].transform.rotate = rotation();
 
+    hierarchy_bird.update_local_to_global_coordinates();
+
     vec3 pos = get_pos_bird();
-    int k = on_ile();
-    if (k > -1 && hit_ile(k)>-1) return;
+    if (hit_ile()) return;
     float t = timer.t;
     timer.update();
     float dt = timer.t - t;
@@ -279,25 +254,21 @@ void fall() {
         omega = omega + cos(theta) * dt * 5;
         theta = theta + omega * dt;
         hierarchy_bird["body"].transform.rotate = rotation({ 1,0,0 }, -theta);
-        hierarchy_bird.update_local_to_global_coordinates();
     }
     else {
         hierarchy_bird["body"].transform.rotate = rotation({ 1,0,0 }, -pi / 2);
-        hierarchy_bird.update_local_to_global_coordinates();
     }
     
     float z = ocean_height(pos[0] + taille_terrain / 2, pos[1] + taille_terrain / 2, taille_terrain, parameters);
     if (z > pos[2]-0.5f ) {
         hierarchy_bird["body"].transform.translate = { pos[0],pos[1],z };
-        hierarchy_bird.update_local_to_global_coordinates();
-        //pos_without_oscill = hierarchy_bird["body"].transform.translate;
         return;
     }
     
     float g = 10.0f;
     vitesse = vitesse + g * dt;
     hierarchy_bird["body"].transform.translate = hierarchy_bird["body"].transform.translate - vec3{0, 0, vitesse *dt};
-    hierarchy_bird.update_local_to_global_coordinates();
     pos_without_oscill = hierarchy_bird["body"].transform.translate;
+    hierarchy_bird.update_local_to_global_coordinates();
     return;
 }

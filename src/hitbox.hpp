@@ -5,10 +5,14 @@
 
 using namespace vcl;
 
-int get_plus_proche(vcl::vec3 pos, std::vector<vcl::vec3> liste, int taille_obj);
-int hit_ois();
-int hit_cercle();
-int hit_ring();
-int hit_cloud();
+int on_ile(float x, float y);
+float height_ile(float x, float y);
+float height_ocean(float x, float y);
 int on_ile();
-int hit_ile(int k);
+int hit_ile();
+int hit_arbre(int k);
+int hit_cloud();
+int hit_ship();
+int hit_ring();
+int hit_cercle();
+int hit_ois();

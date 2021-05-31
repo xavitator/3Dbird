@@ -2,21 +2,35 @@
 #include "view.hpp"
 #include "variable.hpp"
 #include "terrain.hpp"
+#include "hitbox.hpp"
 #include <algorithm>
 
 double approx = 0.0001;
 
+/**
+ * @brief Initialisation de la caméra
+ * 
+ */
 void init_camera(){
 	scene.camera.distance_to_center = 2.5f;
 	vec3 pos_cam = {3, 3, rho_theta_phi[0]};
 	scene.camera.look_at(pos_cam, {0,0,0}, {0,0,1});
 }
 
+/**
+ * @brief Bouger la caméra sur la position de l'oiseau
+ * 
+ */
 void move_camera_center()
 {
 	scene.camera.center_of_rotation = get_pos_bird();
 }
 
+/**
+ * @brief Rendre val proche de 0 sans être égal (éviter une normalisation de vecteur non possible à cause d'un élément valant 0)
+ * 
+ * @param val Valeur à vérifier
+ */
 void change_angle_to_non_zero(double &val){
 	if (std::abs(val) < approx){
 		if(val < 0)
@@ -26,30 +40,12 @@ void change_angle_to_non_zero(double &val){
 	}
 }
 
-int on_ile_cam(float x, float y) {
-	for (int k = 0; k < ile_position.size(); k++) {
-		if (vcl::abs(x - ile_position[k][0]) < 10 && vcl::abs(y - ile_position[k][1]) < 10) {
-			return k;
-		}
-	}
-	return -1;
-}
-
-float height_ile(float x, float y) {
-	int k = on_ile_cam(x,y);
-	if(k < 0) return -1;
-	float u = ((float)x - ile_position[k][0]) / 20 + 0.5f;
-	float v = ((float)y - ile_position[k][1]) / 20 + 0.5f;
-	//std::cout << u << ";" << v << endl;
-	vec3 a = evaluate_terrain(u, v, liste_noise_ile[k]);
-	return a[2];
-}
-
-float height_ocean(float x, float y){
-	float z = ocean_height(x+taille_terrain/2, y + taille_terrain / 2, taille_terrain, parameters);
-	return z;
-}
-
+/**
+ * @brief Bouger la caméra sachant qu'il y a un mouvement de souris entre la position p0 et la position p1 sur le plan de la fenetre
+ * 
+ * @param p0 position d'origine
+ * @param p1 position d'arrivée
+ */
 void move_camera_rotation(vec2 p0, vec2 p1){
 
 	vec3 pos_bird = get_pos_bird();
@@ -85,8 +81,51 @@ void move_camera_rotation(vec2 p0, vec2 p1){
 	scene.camera.look_at(pos_cam, pos_bird, {0,0,rho});
 }
 
-// Store keyboard state
-// left-right / up-down key
+/**
+ * @brief Resize de la fenetre
+ * 
+ * @param n_width nouvelle largeur
+ * @param n_height nouvelle hauteur
+ */
+void window_size_callback(GLFWwindow* , int n_width, int n_height)
+{
+	width = n_width;
+	height = n_height;
+	glViewport(0, 0, width, height);
+	float const aspect = width / static_cast<float>(height);
+	scene.projection = projection_perspective(50.0f*pi/180.0f, aspect, 0.1f, 100.0f);
+}
+
+/**
+ * @brief Fonction appelée lorsque l'utilisateur bouge la souris
+ * 
+ * @param window fenetre où est la souris
+ * @param xpos xpos de la souris
+ * @param ypos ypos de la souris
+ */
+void mouse_move_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	vec2 const  p1 = vec2(xpos, ypos);
+	vec2 const& p0 = user.mouse_prev;
+	glfw_state state = glfw_current_state(window);
+
+	if(state.key_ctrl || user.dead){
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+	else
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	if(! state.key_ctrl && ! user.dead){
+		move_camera_rotation(p0, p1);
+	}
+	user.mouse_prev = p1;
+}
+
+/**
+ * @brief Réaction en fonction des touches sur lesquelles appuie le joueur
+ * 
+ * @param key id de la touche enfoncée
+ * @param action action sur la touche
+ */
 void keyboard_callback(GLFWwindow* , int key, int , int action, int )
 {
 	if(key == GLFW_KEY_UP || key == GLFW_KEY_Z || key == GLFW_KEY_W){
@@ -112,16 +151,4 @@ void keyboard_callback(GLFWwindow* , int key, int , int action, int )
 		if(action == GLFW_PRESS) user.keyboard_state.ctrl = true;
 		if(action == GLFW_RELEASE) user.keyboard_state.ctrl = false;
 	}
-}
-
-
-void initialize_data_view()
-{
-	GLuint const shader_mesh = opengl_create_shader_program(opengl_shader_preset("mesh_vertex"), opengl_shader_preset("mesh_fragment"));
-	mesh_drawable::default_shader = shader_mesh;
-	mesh_drawable::default_texture = opengl_texture_to_gpu(image_raw{1,1,image_color_type::rgba,{255,255,255,255}});
-
-	user.global_frame = mesh_drawable(mesh_primitive_frame());
-	// scene.camera.position_camera = {0.5f, 0.5f, -2.0f};
-	// scene.camera.manipulator_rotate_roll_pitch_yaw(0,0,pi/2.0f);
 }

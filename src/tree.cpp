@@ -2,7 +2,13 @@
 
 using namespace vcl;
 
-
+/**
+ * @brief Create a tree trunk cylinder object 
+ * 
+ * @param radius radius du tronc
+ * @param height taille du tronc
+ * @return mesh mesh représentant le tronc
+ */
 mesh create_tree_trunk_cylinder(float radius, float height)
 {
  
@@ -28,7 +34,6 @@ mesh create_tree_trunk_cylinder(float radius, float height)
 
             // Compute the local surface function
             vec3 const p = { r * std::cos(2 * pi * u), r * std::sin(2 * pi * u), h * (v) };
-            vec2 const uv = { u,v };
 
             // Store vertex coordinates
             cylinder.position[kv + N * ku] = p;
@@ -58,12 +63,17 @@ mesh create_tree_trunk_cylinder(float radius, float height)
 
 
 
-
+/**
+ * @brief Create a cone object
+ * 
+ * @param radius Radius du cone
+ * @param height taille du cone
+ * @param z_offset offset selon z du cone
+ * @return mesh 
+ */
 mesh create_cone(float radius, float height, float z_offset)
 {
     mesh m; 
-    // To do: fill this mesh ...
-    // ...
     const size_t N = 20;
 
     for (size_t k = 0; k < N; ++k)
@@ -89,7 +99,11 @@ mesh create_cone(float radius, float height, float z_offset)
     return m;
 }
 
-
+/**
+ * @brief Create a tree object
+ * 
+ * @return mesh Renvoie un arbre
+ */
 mesh create_tree()
 {
     float const h = 1.0f; // trunk height
@@ -98,13 +112,6 @@ mesh create_tree()
     // Create a brown trunk
     mesh trunk = create_tree_trunk_cylinder(r, h);
     trunk.color.fill({ 0.4f, 0.3f, 0.3f });
-    image_raw const im2 = image_load_png("assets/trunk.png");
-
-    // Send this image to the GPU, and get its identifier texture_image_id
-    GLuint const texture_image_id2 = opengl_texture_to_gpu(im2,
-        GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_S*/,
-        GL_MIRRORED_REPEAT /**GL_TEXTURE_WRAP_T*/);
-
 
 
     // Create a green foliage from 3 cones
