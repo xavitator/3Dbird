@@ -43,7 +43,7 @@ void initialize_data()
 	caillou = mesh_drawable(mesh_load_file_obj("assets/caillou.obj"));
 	caillou.shading.color={0.63f,0.63f,0.63f};
 	caillou.transform.scale = 100;
-	caillou.transform.rotate = rotation({ 1,0,0 }, 0.5f * M_PI);
+	caillou.transform.rotate = rotation({ 1,0,0 }, 0.5f * pi);
 
 	cloud1 = mesh_drawable(mesh_load_file_obj("assets/Cloud_1.obj"));
 	cloud2 = mesh_drawable(mesh_load_file_obj("assets/Cloud_2.obj"));
@@ -59,7 +59,7 @@ void initialize_data()
 	wall.texture = texture_image_id3;
 	wall.shading.alpha = 0.5f;
     
-	std::cout << "Le modèle de bateau que nous utilisons entraine des warnings d'arête de taille 0 :" << std::endl;
+	std::cout << "Le modele de bateau que nous utilisons entraine des warnings d'arete de taille 0 :" << std::endl;
 	ship = mesh_drawable(mesh_load_file_obj("assets/ship.obj"));
 	ship.transform.scale = 0.023f;
 	ship.shading.color = { 0.24f,0.20f,0.2f };
@@ -245,7 +245,7 @@ void display_scene()
 	wall.transform.translate = { 0.0f,-taille_terrain,0 };
 	draw(wall, scene);
 
-	wall.transform.rotate = rotation({ 0,0,1 }, 0.5f * M_PI);
+	wall.transform.rotate = rotation({ 0,0,1 }, 0.5f * pi);
 	wall.transform.translate = { 0.0f,0,0 };
 	draw(wall, scene);
 	wall.transform.translate = { taille_terrain,0,0 };
@@ -264,10 +264,10 @@ void display_scene()
 		fall();
 		draw(hierarchy_bird, scene);
 		float rho = rho_theta_phi[0];
-		float theta = pi / 4;
+		float theta1 = pi / 4;
 		float phi = pi / 4;
 		vec3 pos_bird = get_pos_bird();
-		vec3 pos_centered = { rho * std::sin(theta) * std::cos(phi), rho * std::sin(theta) * std::sin(phi), rho * std::cos(theta) };
+		vec3 pos_centered = { rho * std::sin(theta1) * std::cos(phi), rho * std::sin(theta1) * std::sin(phi), rho * std::cos(theta1) };
 		scene.camera.look_at(pos_centered + pos_bird, pos_bird, { 0,0,rho });
 		move_camera_center();
 	}
