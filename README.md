@@ -1,5 +1,7 @@
 # 3Dbird : Projet d'INF443
 
+vidéo de démonstration : https://youtu.be/9TggWRW7YCE
+
 ## Idée générale
 
 Nous proposons de modéliser un oiseau se baladant au dessus d'une île. Nous proposons de changer le visuel de l'oiseau et le visuel de l'île, choix thématique des visuels. 
